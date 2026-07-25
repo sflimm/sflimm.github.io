@@ -954,7 +954,7 @@ function renderMemoList(){
   let filtered=memos;
   if(currentMemoFilter!=='all')filtered=filtered.filter(m=>m.tags&&m.tags.includes(currentMemoFilter));
   if(search)filtered=filtered.filter(m=>m.content.toLowerCase().includes(search));
-  if(!filtered.length){list.innerHTML='<div class="empty-state">'+(memos.length?'没有匹配记录':'还没有记录'})+'</div>';return;}
+  if(!filtered.length){list.innerHTML='<div class="empty-state">'+(memos.length?'没有匹配记录':'还没有记录')+'</div>';return;}
   list.innerHTML=filtered.map(m=>`<div class="memo-item"><div class="memo-content">${escapeHtml(m.content)}</div><div class="memo-meta">${(m.tags||[]).map(t=>`<span class="memo-tag">${escapeHtml(t)}</span>`).join('')}<span class="memo-time">${new Date(m.time).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</span><button class="memo-delete" onclick="deleteMemo('${m.id}')">删除</button></div></div>`).join('');
 }
 function generateMemoTagPrompt(){
