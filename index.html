@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2c3e50">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="打盹儿工作台">
+<meta name="application-name" content="打盹儿工作台">
+<title>打盹儿工作台</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20192%20192'%3E%3Crect%20width='192'%20height='192'%20rx='42'%20fill='%232c3e50'/%3E%3Ctext%20x='96'%20y='130'%20font-size='110'%20text-anchor='middle'%20fill='%233498db'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg-primary: #f5f6fa;
+    --bg-sidebar: #2c3e50;
+    --bg-card: #ffffff;
+    --bg-hover: #ecf0f1;
+    --bg-active: #34495e;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --text-light: #ecf0f1;
+    --accent: #3498db;
+    --accent-hover: #2980b9;
+    --success: #27ae60;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --border: #e0e0e0;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,0.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  /* ========== 侧边栏 ========== */
+  .sidebar {
+    width: 240px; min-width: 240px;
+    background: var(--bg-sidebar);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-header h1 {
+    color: var(--text-light); font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sidebar-header p {
+    color: rgba(236,240,241,0.5); font-size: 11px; margin-top: 4px;
+  }
+  .nav-menu {
+    flex: 1; padding: 8px 0; list-style: none;
+  }
+  .nav-item {
+    padding: 13px 20px;
+    color: rgba(236,240,241,0.7);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; transition: all 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: var(--bg-active); color: var(--text-light); }
+  .nav-item.active {
+    background: var(--bg-active); color: var(--text-light);
+    border-left-color: var(--accent);
+  }
+  .nav-item .icon { font-size: 17px; width: 22px; text-align: center; }
+
+  /* App 快捷入口 */
+  .app-launcher-section {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .app-launcher-title {
+    color: rgba(236,240,241,0.4); font-size: 11px; margin-bottom: 8px;
+  }
+  .app-launcher-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .app-btn {
+    background: rgba(255,255,255,0.08);
+    border: none; border-radius: 8px;
+    padding: 8px 4px; cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    transition: background 0.2s;
+  }
+  .app-btn:hover { background: rgba(255,255,255,0.15); }
+  .app-btn .app-icon { font-size: 18px; }
+  .app-btn .app-name { color: rgba(236,240,241,0.7); font-size: 9px; }
+
+  .sidebar-footer {
+    padding: 8px 16px 12px;
+    color: rgba(236,240,241,0.35); font-size: 10px; text-align: center;
+  }
+
+  /* ========== 主面板 ========== */
+  .main-panel {
+    flex: 1; overflow-y: auto; padding: 28px 32px;
+  }
+  .panel-header { margin-bottom: 20px; }
+  .panel-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .panel-header .subtitle { color: var(--text-secondary); font-size: 13px; }
+  .panel-content { display: none; }
+  .panel-content.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ========== 通用 ========== */
+  .card {
+    background: var(--bg-card); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 15px; font-weight: 600; margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  .btn {
+    padding: 7px 16px; border: none; border-radius: 8px;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-danger-text { background: none; color: var(--danger); padding: 4px 8px; font-size: 12px; border: none; cursor: pointer; }
+  .input, .textarea, .select {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; transition: border 0.2s;
+  }
+  .input:focus, .textarea:focus, .select:focus { border-color: var(--accent); }
+  .textarea { resize: vertical; min-height: 70px; }
+
+  /* ========== 每日计划 ========== */
+  .overview-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--bg-card); border-radius: var(--radius);
+    padding: 16px; box-shadow: var(--shadow); text-align: center;
+  }
+  .stat-card .stat-value { font-size: 28px; font-weight: 700; color: var(--accent); }
+  .stat-card .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .progress-bar-container {
+    background: var(--bg-primary); border-radius: 20px; height: 22px;
+    overflow: hidden; margin-top: 8px;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--success));
+    border-radius: 20px; transition: width 0.4s ease;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 600; min-width: 36px;
+  }
+  .task-category { margin-bottom: 14px; }
+  .task-category-header {
+    font-size: 14px; font-weight: 600; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .task-category-header .badge {
+    background: var(--accent); color: white; font-size: 11px;
+    padding: 2px 7px; border-radius: 10px; font-weight: normal;
+  }
+  .task-list { list-style: none; }
+  .task-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px; transition: background 0.15s; flex-wrap: wrap;
+  }
+  .task-item:hover { background: var(--bg-hover); }
+  .task-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--success); flex-shrink: 0; }
+  .task-text { flex: 1; font-size: 13px; cursor: pointer; min-width: 80px; }
+  .task-item.completed .task-text { text-decoration: line-through; color: var(--text-secondary); }
+  .task-edit-input { flex: 1; padding: 4px 8px; border: 1px solid var(--accent); border-radius: 4px; font-size: 13px; min-width: 80px; }
+  .task-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; }
+  .task-item:hover .task-actions { opacity: 1; }
+  .task-add-row { display: flex; gap: 8px; margin-top: 8px; }
+  .task-add-row .input { flex: 1; }
+
+  /* ========== 选题灵感 ========== */
+  .hotspot-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;
+  }
+  .hotspot-card {
+    background: linear-gradient(135deg, #fff5f5, #fff0f0);
+    border: 1px solid #ffccc7; border-radius: 10px; padding: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .hotspot-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .hotspot-card .hs-tag { font-size: 11px; color: var(--danger); font-weight: 600; margin-bottom: 5px; }
+  .hotspot-card .hs-content { font-size: 12px; color: var(--text-primary); line-height: 1.5; margin-bottom: 8px; }
+  .hs-search-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .inspiration-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 10px;
+    border-radius: 8px; border: 1px solid var(--border); margin-bottom: 6px; transition: background 0.15s;
+  }
+  .inspiration-item:hover { background: var(--bg-hover); }
+  .inspiration-text { flex: 1; font-size: 13px; line-height: 1.5; }
+  .inspiration-status {
+    font-size: 11px; padding: 3px 9px; border-radius: 10px;
+    font-weight: 500; white-space: nowrap; cursor: pointer;
+  }
+  .status-pending { background: #fff3cd; color: #856404; }
+  .status-used { background: #d4edda; color: #155724; }
+
+  /* AI 提示词输出区 */
+  .prompt-output {
+    background: linear-gradient(135deg, #f0f4ff, #e8eeff);
+    border: 1px solid #c3d4f5; border-radius: 10px;
+    padding: 16px; margin-bottom: 10px;
+  }
+  .prompt-output .prompt-text {
+    font-size: 13px; line-height: 1.7; white-space: pre-wrap;
+    color: var(--text-primary); margin-bottom: 10px;
+    max-height: 300px; overflow-y: auto;
+  }
+  .prompt-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ========== 学习库 ========== */
+  .learning-grid { display: grid; grid-template-columns: 200px 1fr; gap: 16px; }
+  .learning-nav { display: flex; flex-direction: column; gap: 4px; }
+  .learning-nav-item {
+    padding: 11px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; transition: all 0.2s; border: 1px solid transparent;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .learning-nav-item:hover { background: var(--bg-hover); }
+  .learning-nav-item.active { background: var(--accent); color: white; }
+  .learning-nav-item .lni-progress { font-size: 11px; opacity: 0.8; }
+  .learning-detail {
+    background: var(--bg-card); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow);
+  }
+  .learning-content-list { list-style: none; margin-bottom: 16px; }
+  .learning-content-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  }
+  .learning-content-item:last-child { border-bottom: none; }
+
+  /* ========== 成长复盘 ========== */
+  .review-entries { display: flex; gap: 10px; margin-bottom: 16px; }
+  .review-entry-btn {
+    flex: 1; padding: 16px; border-radius: var(--radius);
+    border: 2px solid var(--border); background: var(--bg-card);
+    cursor: pointer; transition: all 0.2s; text-align: center;
+  }
+  .review-entry-btn:hover, .review-entry-btn.active { border-color: var(--accent); background: #f0f7ff; }
+  .review-entry-btn .re-title { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+  .review-entry-btn .re-desc { font-size: 11px; color: var(--text-secondary); }
+  .review-section { margin-bottom: 14px; }
+  .review-section h4 { font-size: 14px; color: var(--accent); margin-bottom: 5px; }
+  .review-section p { font-size: 13px; line-height: 1.7; }
+  .review-timeline-item {
+    border-left: 3px solid var(--accent); padding: 10px 14px; margin-bottom: 10px;
+    background: var(--bg-card); border-radius: 0 8px 8px 0; box-shadow: var(--shadow);
+    cursor: pointer; transition: transform 0.15s;
+  }
+  .review-timeline-item:hover { transform: translateX(4px); }
+  .review-timeline-item .rti-type { font-size: 11px; color: var(--accent); font-weight: 600; }
+  .review-timeline-item .rti-date { font-size: 12px; color: var(--text-secondary); margin-bottom: 3px; }
+  .review-timeline-item .rti-summary { font-size: 12px; color: var(--text-primary); }
+
+  /* ========== 备忘录 ========== */
+  .memo-filters {
+    display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; align-items: center;
+  }
+  .memo-tag-filter {
+    padding: 4px 11px; border-radius: 14px; font-size: 12px;
+    cursor: pointer; border: 1px solid var(--border); background: var(--bg-card); transition: all 0.2s;
+  }
+  .memo-tag-filter:hover { border-color: var(--accent); }
+  .memo-tag-filter.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .memo-item {
+    background: var(--bg-card); border-radius: 10px; padding: 14px;
+    box-shadow: var(--shadow); margin-bottom: 10px; transition: transform 0.15s;
+  }
+  .memo-item:hover { transform: translateY(-2px); }
+  .memo-content { font-size: 13px; line-height: 1.6; margin-bottom: 8px; white-space: pre-wrap; }
+  .memo-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .memo-tag { font-size: 11px; padding: 2px 9px; border-radius: 10px; background: #e8f0fe; color: var(--accent); }
+  .memo-time { font-size: 11px; color: var(--text-secondary); }
+  .memo-delete { margin-left: auto; background: none; border: none; color: var(--danger); cursor: pointer; font-size: 12px; }
+
+  .tag-selector { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .tag-option {
+    padding: 3px 10px; border-radius: 12px; font-size: 12px;
+    border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+  }
+  .tag-option.selected { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .empty-state { text-align: center; padding: 30px 20px; color: var(--text-secondary); font-size: 13px; }
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--text-primary); color: white; padding: 10px 20px;
+    border-radius: 8px; box-shadow: var(--shadow-lg); font-size: 13px; z-index: 9999;
+    opacity: 0; transform: translateY(20px); transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c0c0c0; border-radius: 3px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+
+  /* ========== 计划板块 ========== */
+  .plan-period-tabs {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .plan-period-tab {
+    flex: 1; padding: 12px; border-radius: 10px;
+    border: 2px solid var(--border); background: var(--bg-card);
+    cursor: pointer; transition: all 0.2s; text-align: center; font-family: inherit;
+  }
+  .plan-period-tab.active { border-color: var(--accent); background: #f0f7ff; }
+  .plan-period-tab .ppt-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .plan-period-tab .ppt-desc { font-size: 11px; color: var(--text-secondary); }
+
+  .plan-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px;
+    border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px;
+    transition: background 0.15s;
+  }
+  .plan-item:hover { background: var(--bg-hover); }
+  .plan-item-content { flex: 1; min-width: 0; }
+  .plan-item-text { font-size: 13px; line-height: 1.5; margin-bottom: 4px; }
+  .plan-item-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .plan-item-date { font-size: 11px; color: var(--text-secondary); }
+  .plan-item-status {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+  }
+  .plan-status-pending { background: #fff3cd; color: #856404; }
+  .plan-status-active { background: #d1ecf1; color: #0c5460; }
+  .plan-status-done { background: #d4edda; color: #155724; }
+  .plan-synced-badge { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: #e8f0fe; color: var(--accent); }
+
+  .calendar-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px;
+  }
+  .calendar-header {
+    text-align: center; font-size: 11px; color: var(--text-secondary); font-weight: 600; padding: 4px 0;
+  }
+  .calendar-day {
+    aspect-ratio: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border-radius: 8px; font-size: 12px; cursor: pointer;
+    background: var(--bg-primary); transition: all 0.15s; position: relative;
+  }
+  .calendar-day:hover { background: var(--bg-hover); }
+  .calendar-day.today { background: var(--accent); color: white; font-weight: 600; }
+  .calendar-day.has-event::after {
+    content: ''; position: absolute; bottom: 4px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--danger);
+  }
+  .calendar-day.other-month { opacity: 0.3; }
+  .calendar-day.selected { box-shadow: 0 0 0 2px var(--accent); }
+  .calendar-nav {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+  }
+  .calendar-nav button {
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 12px; cursor: pointer; font-size: 14px; font-family: inherit;
+  }
+  .calendar-nav .cal-title { font-size: 14px; font-weight: 600; }
+
+  .calendar-events { margin-top: 12px; }
+  .calendar-event-item {
+    display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px;
+    border-radius: 6px; background: var(--bg-primary); margin-bottom: 6px; font-size: 12px;
+  }
+  .calendar-event-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 4px; flex-shrink: 0; }
+
+  .sync-banner {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border: 1px solid #81c784; border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px; font-size: 13px; color: #2e7d32;
+  }
+
+  /* ========== 移动端：底部导航栏 + App 抽屉 ========== */
+  .mobile-bottom-nav { display: none; }
+  .mobile-app-fab { display: none; }
+  .app-drawer-overlay { display: none; }
+
+  @media (max-width: 768px) {
+    /* 隐藏桌面侧边栏 */
+    .sidebar { display: none; }
+
+    body { flex-direction: column; }
+
+    .main-panel {
+      flex: 1;
+      padding: 14px 14px 90px 14px; /* 底部留出导航栏空间 */
+      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* 底部固定导航栏 */
+    .mobile-bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--bg-sidebar);
+      height: 64px;
+      z-index: 1000;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .mobile-nav-item {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2px; cursor: pointer;
+      color: rgba(236,240,241,0.5);
+      font-size: 10px; transition: color 0.2s;
+      border: none; background: none;
+      font-family: inherit;
+    }
+    .mobile-nav-item .m-icon { font-size: 20px; }
+    .mobile-nav-item.active { color: var(--accent); }
+    .mobile-nav-item:active { background: rgba(255,255,255,0.05); }
+
+    /* App 快捷入口浮动按钮 */
+    .mobile-app-fab {
+      display: flex;
+      position: fixed;
+      bottom: 74px; right: 16px;
+      width: 48px; height: 48px;
+      background: var(--accent);
+      border-radius: 50%;
+      align-items: center; justify-content: center;
+      font-size: 22px; color: white;
+      box-shadow: 0 4px 16px rgba(52,152,219,0.4);
+      cursor: pointer; z-index: 1000;
+      border: none; transition: transform 0.2s;
+    }
+    .mobile-app-fab:active { transform: scale(0.92); }
+
+    /* App 抽屉 */
+    .app-drawer-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1001;
+    }
+    .app-drawer-overlay.show { display: block; }
+    .app-drawer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--bg-card);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+      z-index: 1002;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      max-height: 60vh; overflow-y: auto;
+    }
+    .app-drawer.show { transform: translateY(0); }
+    .app-drawer-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .app-drawer-header h3 { font-size: 16px; font-weight: 600; }
+    .app-drawer-close {
+      background: none; border: none; font-size: 24px;
+      color: var(--text-secondary); cursor: pointer; padding: 4px 8px;
+    }
+    .app-drawer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .app-drawer-item {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 6px;
+      padding: 12px 4px; border-radius: 12px;
+      background: var(--bg-primary); cursor: pointer;
+      border: none; font-family: inherit;
+      transition: background 0.15s;
+    }
+    .app-drawer-item:active { background: var(--bg-hover); }
+    .app-drawer-item .ad-icon { font-size: 28px; }
+    .app-drawer-item .ad-name { font-size: 11px; color: var(--text-primary); }
+
+    .overview-grid { grid-template-columns: repeat(2, 1fr); }
+    .learning-grid { grid-template-columns: 1fr; }
+    .review-entries { flex-direction: column; }
+    .card { padding: 16px; }
+    .stat-card { padding: 12px; }
+    .stat-card .stat-value { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== 侧边栏 ========== -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h1>🌱 打盹儿工作台</h1>
+    <p>Personal Growth Workspace</p>
+  </div>
+  <ul class="nav-menu" id="navMenu">
+    <li class="nav-item active" data-panel="daily-plan">
+      <span class="icon">📋</span><span>每日计划</span>
+    </li>
+    <li class="nav-item" data-panel="plan">
+      <span class="icon">📅</span><span>计划</span>
+    </li>
+    <li class="nav-item" data-panel="topics">
+      <span class="icon">💡</span><span>选题灵感</span>
+    </li>
+    <li class="nav-item" data-panel="learning">
+      <span class="icon">📚</span><span>学习库</span>
+    </li>
+    <li class="nav-item" data-panel="review">
+      <span class="icon">🔄</span><span>成长复盘</span>
+    </li>
+    <li class="nav-item" data-panel="memo">
+      <span class="icon">📝</span><span>备忘录</span>
+    </li>
+  </ul>
+
+  <!-- App 快捷入口 -->
+  <div class="app-launcher-section">
+    <div class="app-launcher-title">⚡ 快捷入口</div>
+    <div class="app-launcher-grid" id="appLauncherGrid"></div>
+  </div>
+
+  <div class="sidebar-footer">数据本地存储 · 自动保存</div>
+</aside>
+
+<!-- ========== 主面板 ========== -->
+<main class="main-panel">
+
+  <!-- ===== 每日计划 ===== -->
+  <div class="panel-content active" id="panel-daily-plan">
+    <div class="panel-header">
+      <h2>📋 每日计划</h2>
+      <div class="subtitle" id="todayDate"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">今日概览</div>
+      <div class="overview-grid">
+        <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">今日任务</div></div>
+        <div class="stat-card"><div class="stat-value" id="statDone" style="color:var(--success)">0</div><div class="stat-label">已完成</div></div>
+        <div class="stat-card"><div class="stat-value" id="statTodo" style="color:var(--warning)">0</div><div class="stat-label">待完成</div></div>
+        <div class="stat-card"><div class="stat-value" id="statRate" style="color:var(--accent)">0%</div><div class="stat-label">完成率</div></div>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%">0%</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">任务分类区</div>
+      <div class="task-category">
+        <div class="task-category-header">🏠 个人日常必做 <span class="badge" id="cat1Count">0/0</span></div>
+        <ul class="task-list" id="taskList-1"></ul>
+        <div class="task-add-row">
+          <input type="text" class="input" id="taskInput-1" placeholder="+ 添加日常必做任务..." onkeydown="if(event.key==='Enter')addTask(1)">
+          <button class="btn btn-primary btn-sm" onclick="addTask(1)">添加</button>
+        </div>
+      </div>
+      <div class="task-category">
+        <div class="task-category-header">💼 工作相关任务 <span class="badge" id="cat2Count">0/0</span></div>
+        <ul class="task-list" id="taskList-2"></ul>
+        <div class="task-add-row">
+          <input type="text" class="input" id="taskInput-2" placeholder="+ 添加工作待办..." onkeydown="if(event.key==='Enter')addTask(2)">
+          <button class="btn btn-primary btn-sm" onclick="addTask(2)">添加</button>
+        </div>
+      </div>
+      <div class="task-category">
+        <div class="task-category-header">✨ 额外任务 <span class="badge" id="cat3Count">0/0</span></div>
+        <ul class="task-list" id="taskList-3"></ul>
+        <div class="task-add-row">
+          <input type="text" class="input" id="taskInput-3" placeholder="+ 添加弹性任务（如清理冰箱、洗衣服）..." onkeydown="if(event.key==='Enter')addTask(3)">
+          <button class="btn btn-primary btn-sm" onclick="addTask(3)">添加</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 计划 ===== -->
+  <div class="panel-content" id="panel-plan">
+    <div class="panel-header">
+      <h2>📅 计划</h2>
+      <div class="subtitle">周初 · 月初 · 年初事先规划，可同步到每日计划</div>
+    </div>
+
+    <!-- 周期选择 -->
+    <div class="plan-period-tabs">
+      <button class="plan-period-tab active" data-period="week" onclick="selectPlanPeriod('week')">
+        <div class="ppt-title">📆 周计划</div>
+        <div class="ppt-desc">周初规划本周任务</div>
+      </button>
+      <button class="plan-period-tab" data-period="month" onclick="selectPlanPeriod('month')">
+        <div class="ppt-title">📆 月计划</div>
+        <div class="ppt-desc">月初规划本月目标</div>
+      </button>
+      <button class="plan-period-tab" data-period="year" onclick="selectPlanPeriod('year')">
+        <div class="ppt-title">📆 年计划</div>
+        <div class="ppt-desc">年初规划年度方向</div>
+      </button>
+    </div>
+
+    <!-- 日历区 -->
+    <div class="card">
+      <div class="card-title">
+        🗓️ 日历
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="syncCalendar()">🔄 读取日历</button>
+          <button class="btn btn-outline btn-sm" onclick="prevMonth()">‹</button>
+          <button class="btn btn-outline btn-sm" onclick="nextMonth()">›</button>
+        </div>
+      </div>
+      <div class="calendar-nav">
+        <span class="cal-title" id="calTitle"></span>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="calendar-events" id="calendarEvents">
+        <div class="empty-state">点击「读取日历」同步手机日历事件，或点击日期添加备忘</div>
+      </div>
+    </div>
+
+    <!-- 计划列表 -->
+    <div class="card">
+      <div class="card-title">
+        📝 <span id="planPeriodTitle">周计划</span>
+        <span style="font-size:12px;color:var(--text-secondary);font-weight:normal" id="planCount">0 项</span>
+      </div>
+
+      <!-- 同步提示 -->
+      <div id="syncBanner"></div>
+
+      <!-- 新增计划 -->
+      <div class="task-add-row" style="margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" class="input" id="planInput" placeholder="添加计划事项..." style="flex:1;min-width:120px" onkeydown="if(event.key==='Enter')addPlan()">
+        <input type="date" class="input" id="planDate" style="width:auto;min-width:130px">
+        <select class="select" id="planCategory" style="width:auto;min-width:100px">
+          <option value="2">工作</option>
+          <option value="3">额外</option>
+          <option value="1">日常必做</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="addPlan()">添加</button>
+      </div>
+
+      <!-- 计划列表 -->
+      <div id="planList">
+        <div class="empty-state">还没有计划，添加你的第一项规划吧</div>
+      </div>
+    </div>
+
+    <!-- 操作说明 -->
+    <div class="card" style="background:#f0f7ff;border:1px solid #91d5ff">
+      <div style="font-size:13px;color:var(--text-primary);line-height:1.8">
+        <strong>💡 使用说明</strong><br>
+        • 在周初/月初/年初切换对应周期，添加计划事项<br>
+        • 点击「读取日历」可同步手机系统日历的事件到日历视图<br>
+        • 点击计划项的「同步到每日计划」按钮，可将该事项推送到对应日期的每日任务中<br>
+        • 已同步的计划会标记 <span class="plan-synced-badge">已同步</span> 徽章
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 选题灵感 ===== -->
+  <div class="panel-content" id="panel-topics">
+    <div class="panel-header">
+      <h2>💡 选题灵感</h2>
+      <div class="subtitle">追踪热点 · 记录灵感 · 一键发给 AI 选题</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔥 热点追踪 <span style="font-size:12px;color:var(--text-secondary);font-weight:normal">点击关键词搜索</span></div>
+      <div class="hotspot-grid" id="hotspotGrid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">✏️ 灵感记录区</div>
+      <div class="task-add-row" style="margin-bottom:10px">
+        <input type="text" class="input" id="inspirationInput" placeholder="快速记录一个选题灵感..." onkeydown="if(event.key==='Enter')addInspiration()">
+        <button class="btn btn-primary btn-sm" onclick="addInspiration()">记录</button>
+      </div>
+      <div id="inspirationList"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🤖 AI 选题建议 <button class="btn btn-primary btn-sm" onclick="generateTopicPrompt()">生成选题提示词</button></div>
+      <div id="aiTopicOutput">
+        <div class="empty-state">点击「生成选题提示词」，自动汇总你的关注方向、灵感和内容表现，生成提示词后可一键分享给豆包/DeepSeek</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 学习库 ===== -->
+  <div class="panel-content" id="panel-learning">
+    <div class="panel-header">
+      <h2>📚 学习库</h2>
+      <div class="subtitle">系统化学习 · 一键搜索资源 · 跟踪进度</div>
+    </div>
+    <div class="learning-grid">
+      <div class="learning-nav" id="learningNav"></div>
+      <div class="learning-detail" id="learningDetail">
+        <div class="empty-state">请从左侧选择一个学习方向</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 成长复盘 ===== -->
+  <div class="panel-content" id="panel-review">
+    <div class="panel-header">
+      <h2>🔄 成长复盘</h2>
+      <div class="subtitle">定期回顾 · AI 辅助生成 · 持续改进</div>
+    </div>
+    <div class="review-entries">
+      <div class="review-entry-btn active" data-type="week" onclick="selectReviewType('week')">
+        <div class="re-title">📅 周复盘</div><div class="re-desc">每周日晚上进行</div>
+      </div>
+      <div class="review-entry-btn" data-type="month" onclick="selectReviewType('month')">
+        <div class="re-title">📅 月复盘</div><div class="re-desc">每月底进行</div>
+      </div>
+      <div class="review-entry-btn" data-type="quarter" onclick="selectReviewType('quarter')">
+        <div class="re-title">📅 季度复盘</div><div class="re-desc">每季度末进行</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🤖 AI 辅助复盘 <button class="btn btn-primary btn-sm" onclick="generateReviewPrompt()">生成复盘提示词</button></div>
+      <div id="reviewOutput">
+        <div class="empty-state">点击「生成复盘提示词」，自动汇总本期数据，生成结构化复盘提示词后分享给豆包/DeepSeek</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📂 历史复盘归档 <input type="text" class="input" style="width:180px;font-size:12px" id="reviewSearch" placeholder="检索复盘记录..." oninput="renderReviewTimeline()"></div>
+      <div id="reviewTimeline"></div>
+    </div>
+  </div>
+
+  <!-- ===== 备忘录 ===== -->
+  <div class="panel-content" id="panel-memo">
+    <div class="panel-header">
+      <h2>📝 备忘录</h2>
+      <div class="subtitle">所思 · 所想 · 所作 — 手动标签 + AI 辅助分类</div>
+    </div>
+    <div class="card">
+      <div class="card-title">快速记录</div>
+      <textarea class="textarea" id="memoInput" placeholder="随时随地记录你的想法、灵感、待办..." style="min-height:90px"></textarea>
+      <div class="tag-selector" id="memoTagSelector"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="addMemo()">保存记录</button>
+        <button class="btn btn-outline" onclick="document.getElementById('memoInput').value='';selectedMemoTags=[];renderTagSelector()">清空</button>
+        <button class="btn btn-outline" onclick="generateMemoTagPrompt()">🤖 AI 帮我分类</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">所有记录</div>
+      <div class="memo-filters">
+        <input type="text" class="input" style="width:180px;font-size:12px" id="memoSearch" placeholder="搜索内容..." oninput="renderMemoList()">
+        <span class="memo-tag-filter active" data-tag="all" onclick="setMemoFilter('all')">全部</span>
+        <span class="memo-tag-filter" data-tag="#工作" onclick="setMemoFilter('#工作')">#工作</span>
+        <span class="memo-tag-filter" data-tag="#生活" onclick="setMemoFilter('#生活')">#生活</span>
+        <span class="memo-tag-filter" data-tag="#创作灵感" onclick="setMemoFilter('#创作灵感')">#创作灵感</span>
+        <span class="memo-tag-filter" data-tag="#健康" onclick="setMemoFilter('#健康')">#健康</span>
+        <span class="memo-tag-filter" data-tag="#学习" onclick="setMemoFilter('#学习')">#学习</span>
+        <span class="memo-tag-filter" data-tag="#情绪记录" onclick="setMemoFilter('#情绪记录')">#情绪记录</span>
+      </div>
+      <div id="memoList"></div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- ========== 移动端底部导航栏 ========== -->
+<nav class="mobile-bottom-nav" id="mobileNav">
+  <button class="mobile-nav-item active" data-panel="daily-plan">
+    <span class="m-icon">📋</span><span>每日计划</span>
+  </button>
+  <button class="mobile-nav-item" data-panel="plan">
+    <span class="m-icon">📅</span><span>计划</span>
+  </button>
+  <button class="mobile-nav-item" data-panel="topics">
+    <span class="m-icon">💡</span><span>选题灵感</span>
+  </button>
+  <button class="mobile-nav-item" data-panel="learning">
+    <span class="m-icon">📚</span><span>学习库</span>
+  </button>
+  <button class="mobile-nav-item" data-panel="review">
+    <span class="m-icon">🔄</span><span>复盘</span>
+  </button>
+  <button class="mobile-nav-item" data-panel="memo">
+    <span class="m-icon">📝</span><span>备忘录</span>
+  </button>
+</nav>
+
+<!-- 移动端 App 快捷入口浮动按钮 -->
+<button class="mobile-app-fab" onclick="toggleAppDrawer(true)">⚡</button>
+
+<!-- App 抽屉 -->
+<div class="app-drawer-overlay" id="appDrawerOverlay" onclick="toggleAppDrawer(false)"></div>
+<div class="app-drawer" id="appDrawer">
+  <div class="app-drawer-header">
+    <h3>⚡ 快捷入口</h3>
+    <button class="app-drawer-close" onclick="toggleAppDrawer(false)">✕</button>
+  </div>
+  <div class="app-drawer-grid" id="appDrawerGrid"></div>
+</div>
+
+<script>
+/* ============================================================
+   数据层
+   ============================================================ */
+const STORE = { tasks:'gw_tasks', inspirations:'gw_inspirations', learning:'gw_learning', reviews:'gw_reviews', memos:'gw_memos', plans:'gw_plans', calendarEvents:'gw_cal_events' };
+function load(k,d){ try{return JSON.parse(localStorage.getItem(k))??d}catch{return d} }
+function save(k,v){ localStorage.setItem(k,JSON.stringify(v)) }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7) }
+
+let tasks = load(STORE.tasks, null);
+let inspirations = load(STORE.inspirations, []);
+let learningData = load(STORE.learning, null);
+let reviews = load(STORE.reviews, []);
+let memos = load(STORE.memos, []);
+let currentReviewType = 'week';
+let currentMemoFilter = 'all';
+let currentLearningDir = null;
+let selectedMemoTags = [];
+let plans = load(STORE.plans, { week: [], month: [], year: [] });
+let calendarEvents = load(STORE.calendarEvents, []);
+let currentPlanPeriod = 'week';
+let calendarViewDate = new Date();
+let selectedCalDate = null;
+
+function todayKey(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getDefaultTasks(){
+  return { date: todayKey(), categories: {
+    1: [
+      {id:uid(),text:'健身',done:false,fixed:true},
+      {id:uid(),text:'学习1小时',done:false,fixed:true},
+      {id:uid(),text:'公众号更新提醒',done:false,fixed:true},
+      {id:uid(),text:'叶酸补充',done:false,fixed:true},
+    ],
+    2: [], 3: []
+  }};
+}
+if(!tasks||tasks.date!==todayKey()){ tasks=getDefaultTasks(); save(STORE.tasks,tasks); }
+
+function getDefaultLearning(){
+  return { directions: {
+    'video': {name:'🎬 视频创作',progress:0,contents:['热点爆点分析','剪辑技巧','平台算法']},
+    'ps': {name:'🎨 PS 技能',progress:0,contents:['基础工具','修图实战']},
+    'shooting': {name:'📷 拍摄技能',progress:0,contents:['构图','光线','手机摄影']},
+    'english': {name:'🗣️ 英语练习',progress:0,contents:['日常对话','听力训练']},
+    'calligraphy': {name:'✒️ 硬笔书法',progress:0,contents:['行楷基础','每日练字']},
+    'finance': {name:'💰 理财知识',progress:0,contents:['基金定投','家庭资产配置','新手入门']},
+  }};
+}
+if(!learningData){ learningData=getDefaultLearning(); save(STORE.learning,learningData); }
+
+/* ============================================================
+   App 配置 — URL Scheme + intent://
+   ============================================================ */
+const APPS = [
+  { name:'豆包', icon:'🤖', scheme:'doubao://', pkg:'com.larus.nova', store:'https://www.wandoujia.com/apps/com.larus.nova' },
+  { name:'DeepSeek', icon:'🧠', scheme:'deepseek://', pkg:'com.deepseek.chat', store:'https://www.wandoujia.com/apps/com.deepseek.chat' },
+  { name:'抖音', icon:'🎵', scheme:'snssdk1128://', pkg:'com.ss.android.ugc.aweme', store:'https://www.wandoujia.com/apps/com.ss.android.ugc.aweme' },
+  { name:'小红书', icon:'📕', scheme:'xhsdiscover://', pkg:'com.xingin.xhs', store:'https://www.wandoujia.com/apps/com.xingin.xhs' },
+  { name:'微信', icon:'💬', scheme:'weixin://', pkg:'com.tencent.mm', store:'https://www.wandoujia.com/apps/com.tencent.mm' },
+  { name:'米家', icon:'🏠', scheme:'mihome://', pkg:'com.xiaomi.smarthome', store:'https://www.wandoujia.com/apps/com.xiaomi.smarthome' },
+  { name:'运动健康', icon:'🏃', scheme:'huaweihealth://', pkg:'com.huawei.health', store:'https://www.wandoujia.com/apps/com.huawei.health' },
+  { name:'美柚', icon:'🌸', scheme:'meiyou://', pkg:'com.meiyoi.meiyou', store:'https://www.wandoujia.com/apps/com.meiyoi.meiyou' },
+];
+
+function openApp(app){
+  // 优先尝试 intent:// 协议（支持未安装时降级）
+  const intentUrl = `intent://#Intent;package=${app.pkg};scheme=${app.scheme.replace('://','')};S.browser_fallback_url=${encodeURIComponent(app.store)};end`;
+  const a = document.createElement('a');
+  a.href = intentUrl;
+  a.click();
+}
+
+function renderAppLauncher(){
+  const grid = document.getElementById('appLauncherGrid');
+  grid.innerHTML = APPS.map((app,i) =>
+    `<button class="app-btn" onclick="openApp(APPS[${i}])" title="${app.name}">
+      <span class="app-icon">${app.icon}</span>
+      <span class="app-name">${app.name}</span>
+    </button>`
+  ).join('');
+}
+
+/* ============================================================
+   核心：分享/复制/跳转 AI
+   ============================================================ */
+async function shareToAI(text){
+  if(navigator.share){
+    try {
+      await navigator.share({ title: '发给 AI', text: text });
+      return true;
+    } catch(e) {
+      if(e.name !== 'AbortError') toast('分享取消');
+      return false;
+    }
+  } else {
+    return copyToClipboard(text);
+  }
+}
+
+async function copyToClipboard(text){
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('✅ 已复制到剪贴板，可粘贴到豆包/DeepSeek');
+    return true;
+  } catch(e) {
+    // 降级方案
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('✅ 已复制到剪贴板'); return true; }
+    catch(e2) { toast('复制失败，请手动选择文本复制'); return false; }
+    finally { document.body.removeChild(ta); }
+  }
+}
+
+// 生成提示词操作按钮组
+function promptActionsHTML(promptText){
+  return `<div class="prompt-actions">
+    <button class="btn btn-primary btn-sm" onclick="shareToAI(${JSON.stringify(promptText)})">📤 分享到 AI</button>
+    <button class="btn btn-outline btn-sm" onclick="copyToClipboard(${JSON.stringify(promptText)})">📋 复制提示词</button>
+    <button class="btn btn-outline btn-sm" onclick="openApp(APPS[0])">🤖 打开豆包</button>
+    <button class="btn btn-outline btn-sm" onclick="openApp(APPS[1])">🧠 打开 DeepSeek</button>
+  </div>`;
+}
+
+/* ============================================================
+   导航
+   ============================================================ */
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => switchPanel(item.dataset.panel, item));
+});
+document.querySelectorAll('.mobile-nav-item').forEach(item => {
+  item.addEventListener('click', () => switchPanel(item.dataset.panel, item));
+});
+
+function switchPanel(panel, clickedItem){
+  // 桌面端高亮
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  // 移动端高亮
+  document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
+  if(clickedItem) clickedItem.classList.add('active');
+  // 同步另一端的高亮
+  if(clickedItem){
+    const isDesktop = clickedItem.classList.contains('nav-item');
+    const selector = isDesktop ? '.mobile-nav-item' : '.nav-item';
+    const syncItem = document.querySelector(selector + `[data-panel="${panel}"]`);
+    if(syncItem) syncItem.classList.add('active');
+  }
+  // 切换面板
+  document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+panel).classList.add('active');
+  // 按需渲染
+  if(panel==='daily-plan') renderTasks();
+  if(panel==='plan') { renderPlanList(); renderCalendar(); }
+  if(panel==='topics') renderInspirations();
+  if(panel==='learning') renderLearningNav();
+  if(panel==='review') renderReviewTimeline();
+  if(panel==='memo') { renderMemoList(); renderTagSelector(); }
+  // 移动端切换后滚动回顶部
+  document.querySelector('.main-panel').scrollTop = 0;
+}
+
+/* App 抽屉开关 */
+function toggleAppDrawer(show){
+  document.getElementById('appDrawer').classList.toggle('show', show);
+  document.getElementById('appDrawerOverlay').classList.toggle('show', show);
+}
+
+function renderAppDrawer(){
+  const grid = document.getElementById('appDrawerGrid');
+  grid.innerHTML = APPS.map((app,i) =>
+    `<button class="app-drawer-item" onclick="openApp(APPS[${i}]);toggleAppDrawer(false)">
+      <span class="ad-icon">${app.icon}</span>
+      <span class="ad-name">${app.name}</span>
+    </button>`
+  ).join('');
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function escapeHtml(s){ if(!s)return''; return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============================================================
+   每日计划
+   ============================================================ */
+function renderTasks(){
+  let total=0,done=0;
+  for(let cat=1;cat<=3;cat++){
+    const list=tasks.categories[cat]||[];
+    const ul=document.getElementById('taskList-'+cat);
+    ul.innerHTML='';
+    let catDone=0;
+    list.forEach(task=>{
+      total++; if(task.done){done++;catDone++;}
+      const li=document.createElement('li');
+      li.className='task-item'+(task.done?' completed':'');
+      li.dataset.id=task.id;
+      li.innerHTML=`<input type="checkbox" ${task.done?'checked':''} onchange="toggleTask(${cat},'${task.id}')">
+        <span class="task-text" ondblclick="editTask(${cat},'${task.id}')">${escapeHtml(task.text)}</span>
+        <div class="task-actions">
+          <button class="btn-sm btn-outline" onclick="editTask(${cat},'${task.id}')">编辑</button>
+          <button class="btn-danger-text" onclick="deleteTask(${cat},'${task.id}')">删除</button>
+        </div>`;
+      ul.appendChild(li);
+    });
+    document.getElementById('cat'+cat+'Count').textContent=`${catDone}/${list.length}`;
+  }
+  const todo=total-done, rate=total?Math.round(done/total*100):0;
+  document.getElementById('statTotal').textContent=total;
+  document.getElementById('statDone').textContent=done;
+  document.getElementById('statTodo').textContent=todo;
+  document.getElementById('statRate').textContent=rate+'%';
+  document.getElementById('progressFill').style.width=rate+'%';
+  document.getElementById('progressFill').textContent=rate+'%';
+}
+function addTask(cat){
+  const input=document.getElementById('taskInput-'+cat);
+  const text=input.value.trim(); if(!text)return;
+  tasks.categories[cat].push({id:uid(),text,done:false});
+  input.value=''; save(STORE.tasks,tasks); renderTasks(); toast('任务已添加');
+}
+function toggleTask(cat,id){
+  const t=tasks.categories[cat].find(x=>x.id===id);
+  if(t){t.done=!t.done;save(STORE.tasks,tasks);renderTasks();}
+}
+function deleteTask(cat,id){
+  tasks.categories[cat]=tasks.categories[cat].filter(x=>x.id!==id);
+  save(STORE.tasks,tasks);renderTasks();toast('已删除');
+}
+function editTask(cat,id){
+  const li=document.querySelector(`#taskList-${cat} li[data-id="${id}"]`);if(!li)return;
+  const t=tasks.categories[cat].find(x=>x.id===id);if(!t)return;
+  const span=li.querySelector('.task-text');
+  const input=document.createElement('input');
+  input.type='text';input.className='task-edit-input';input.value=t.text;
+  span.replaceWith(input);input.focus();input.select();
+  const finish=()=>{const v=input.value.trim();if(v){t.text=v;save(STORE.tasks,tasks);}renderTasks();};
+  input.addEventListener('blur',finish);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')finish();if(e.key==='Escape')renderTasks();});
+}
+
+/* ============================================================
+   计划板块
+   ============================================================ */
+function selectPlanPeriod(period){
+  currentPlanPeriod = period;
+  document.querySelectorAll('.plan-period-tab').forEach(t => t.classList.toggle('active', t.dataset.period === period));
+  const titles = { week:'周计划', month:'月计划', year:'年计划' };
+  document.getElementById('planPeriodTitle').textContent = titles[period];
+  renderPlanList();
+}
+
+function addPlan(){
+  const input = document.getElementById('planInput');
+  const dateInput = document.getElementById('planDate');
+  const catInput = document.getElementById('planCategory');
+  const text = input.value.trim();
+  if(!text) return;
+  const plan = {
+    id: uid(),
+    text,
+    period: currentPlanPeriod,
+    date: dateInput.value || '',
+    category: catInput.value,
+    status: 'pending', // pending / active / done
+    synced: false,
+    syncedTaskId: null,
+    created: Date.now(),
+  };
+  plans[currentPlanPeriod].unshift(plan);
+  save(STORE.plans, plans);
+  input.value = '';
+  dateInput.value = '';
+  renderPlanList();
+  toast('计划已添加');
+}
+
+function deletePlan(id){
+  for(const period of ['week','month','year']){
+    plans[period] = plans[period].filter(p => p.id !== id);
+  }
+  save(STORE.plans, plans);
+  renderPlanList();
+  toast('已删除');
+}
+
+function cyclePlanStatus(id){
+  const statuses = ['pending','active','done'];
+  const labels = { pending:'待开始', active:'进行中', done:'已完成' };
+  for(const period of ['week','month','year']){
+    const p = plans[period].find(x => x.id === id);
+    if(p){
+      const idx = statuses.indexOf(p.status);
+      p.status = statuses[(idx + 1) % statuses.length];
+      save(STORE.plans, plans);
+      renderPlanList();
+      return;
+    }
+  }
+}
+
+// 同步计划项到每日计划
+function syncPlanToDaily(id){
+  let plan = null;
+  for(const period of ['week','month','year']){
+    plan = plans[period].find(x => x.id === id);
+    if(plan) break;
+  }
+  if(!plan) return;
+
+  // 确定同步到哪一天的任务
+  let targetDate = plan.date;
+  if(!targetDate) targetDate = todayKey(); // 没有日期就同步到今天
+
+  // 如果目标日期不是今天，需要创建/切换对应日期的任务集
+  const today = todayKey();
+  if(targetDate !== today){
+    toast(`已同步到 ${targetDate} 的每日计划`);
+    // 存储到指定日期的任务集
+    let dayTasks = load('gw_tasks_' + targetDate, null);
+    if(!dayTasks){
+      dayTasks = { date: targetDate, categories: { 1: [...getDefaultTasks().categories[1].map(t=>({...t,id:uid()}))], 2: [], 3: [] } };
+    }
+    const cat = parseInt(plan.category) || 2;
+    dayTasks.categories[cat].push({ id: uid(), text: plan.text, done: false });
+    save('gw_tasks_' + targetDate, dayTasks);
+  } else {
+    // 同步到今天
+    const cat = parseInt(plan.category) || 2;
+    // 避免重复同步
+    if(plan.synced && plan.syncedTaskId){
+      toast('该计划已同步，无需重复操作');
+      return;
+    }
+    const newTaskId = uid();
+    tasks.categories[cat].push({ id: newTaskId, text: plan.text, done: false });
+    save(STORE.tasks, tasks);
+    plan.synced = true;
+    plan.syncedTaskId = newTaskId;
+    save(STORE.plans, plans);
+    renderTasks();
+    renderPlanList();
+    toast('✅ 已同步到今日每日计划');
+  }
+
+  if(!plan.synced){
+    plan.synced = true;
+    save(STORE.plans, plans);
+    renderPlanList();
+  }
+}
+
+function renderPlanList(){
+  const list = document.getElementById('planList');
+  const countEl = document.getElementById('planCount');
+  const syncBanner = document.getElementById('syncBanner');
+  const items = plans[currentPlanPeriod] || [];
+  countEl.textContent = items.length + ' 项';
+
+  // 同步提示
+  const syncedCount = items.filter(p => p.synced).length;
+  if(syncedCount > 0){
+    syncBanner.innerHTML = `<div class="sync-banner">✅ ${syncedCount} 项计划已同步到每日计划</div>`;
+  } else {
+    syncBanner.innerHTML = '';
+  }
+
+  if(!items.length){
+    list.innerHTML = '<div class="empty-state">还没有计划，添加你的第一项规划吧</div>';
+    return;
+  }
+
+  const statusLabels = { pending:'待开始', active:'进行中', done:'已完成' };
+  const statusClasses = { pending:'plan-status-pending', active:'plan-status-active', done:'plan-status-done' };
+  const catLabels = { '1':'日常必做', '2':'工作', '3':'额外' };
+
+  list.innerHTML = items.map(p => `
+    <div class="plan-item">
+      <div class="plan-item-content">
+        <div class="plan-item-text">${escapeHtml(p.text)}</div>
+        <div class="plan-item-meta">
+          ${p.date ? `<span class="plan-item-date">📅 ${p.date}</span>` : ''}
+          <span class="plan-item-date">📂 ${catLabels[p.category]||'工作'}</span>
+          <span class="plan-item-status ${statusClasses[p.status]}" onclick="cyclePlanStatus('${p.id}')">${statusLabels[p.status]}</span>
+          ${p.synced ? '<span class="plan-synced-badge">已同步</span>' : ''}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+        <button class="btn btn-primary btn-sm" onclick="syncPlanToDaily('${p.id}')" ${p.synced?'disabled style="opacity:0.5"':''}>${p.synced?'已同步':'同步到每日'}</button>
+        <button class="btn-danger-text" onclick="deletePlan('${p.id}')">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ========== 日历 ========== */
+async function syncCalendar(){
+  // 尝试通过 ICS 日历链接读取（如果用户有提供）
+  // 或者尝试 Web API 读取本地日历（安卓 Chrome 不支持直接读日历）
+  // 这里提供一个导入 ICS 文件的方式 + 手动添加事件
+  const choice = confirm('点击「确定」从手机日历导出事件（通过分享到本应用），\n或点击「取消」手动添加日历事件');
+  if(choice){
+    // 尝试用 Web Share API 的文件拾取
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.ics,text/calendar';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      const text = await file.text();
+      parseICS(text);
+    };
+    input.click();
+  } else {
+    // 手动添加
+    const date = prompt('输入日期 (YYYY-MM-DD)：', todayKey());
+    if(!date) return;
+    const title = prompt('事件内容：');
+    if(!title) return;
+    calendarEvents.push({ id: uid(), date, title });
+    save(STORE.calendarEvents, calendarEvents);
+    renderCalendar();
+    toast('日历事件已添加');
+  }
+}
+
+function parseICS(text){
+  const events = [];
+  const lines = text.split(/\r?\n/);
+  let current = null;
+  for(const line of lines){
+    if(line.startsWith('BEGIN:VEVENT')) current = {};
+    else if(line.startsWith('SUMMARY:') && current) current.title = line.substring(7).replace(/\\,/g,',');
+    else if(line.startsWith('DTSTART') && current){
+      const m = line.match(/(\d{4})(\d{2})(\d{2})/);
+      if(m) current.date = `${m[1]}-${m[2]}-${m[3]}`;
+    }
+    else if(line.startsWith('END:VEVENT') && current){
+      if(current.date && current.title) events.push({ id: uid(), date: current.date, title: current.title });
+      current = null;
+    }
+  }
+  // 合并去重
+  const existing = new Set(calendarEvents.map(e => e.date + '|' + e.title));
+  events.forEach(e => { if(!existing.has(e.date + '|' + e.title)) calendarEvents.push(e); });
+  save(STORE.calendarEvents, calendarEvents);
+  renderCalendar();
+  toast(`✅ 已导入 ${events.length} 个日历事件`);
+}
+
+function prevMonth(){
+  calendarViewDate.setMonth(calendarViewDate.getMonth() - 1);
+  renderCalendar();
+}
+function nextMonth(){
+  calendarViewDate.setMonth(calendarViewDate.getMonth() + 1);
+  renderCalendar();
+}
+
+function renderCalendar(){
+  const grid = document.getElementById('calendarGrid');
+  const title = document.getElementById('calTitle');
+  const year = calendarViewDate.getFullYear();
+  const month = calendarViewDate.getMonth();
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  title.textContent = `${year}年 ${monthNames[month]}`;
+
+  const today = todayKey();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startWeekday = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  const eventDates = new Set(calendarEvents.map(e => e.date));
+  let html = '';
+  const weekdays = ['日','一','二','三','四','五','六'];
+  weekdays.forEach(w => html += `<div class="calendar-header">${w}</div>`);
+
+  // 上月填充
+  for(let i = startWeekday - 1; i >= 0; i--){
+    html += `<div class="calendar-day other-month">${prevMonthDays - i}</div>`;
+  }
+  // 本月
+  for(let d = 1; d <= daysInMonth; d++){
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === today;
+    const hasEvent = eventDates.has(dateStr);
+    const isSelected = dateStr === selectedCalDate;
+    html += `<div class="calendar-day ${isToday?'today':''} ${hasEvent?'has-event':''} ${isSelected?'selected':''}" onclick="selectCalDay('${dateStr}')">${d}</div>`;
+  }
+  // 下月填充
+  const totalCells = startWeekday + daysInMonth;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for(let d = 1; d <= remaining; d++){
+    html += `<div class="calendar-day other-month">${d}</div>`;
+  }
+  grid.innerHTML = html;
+
+  // 渲染选中日期的事件
+  renderCalendarEvents();
+}
+
+function selectCalDay(dateStr){
+  selectedCalDate = dateStr;
+  renderCalendar();
+}
+
+function renderCalendarEvents(){
+  const container = document.getElementById('calendarEvents');
+  let events;
+  if(selectedCalDate){
+    events = calendarEvents.filter(e => e.date === selectedCalDate);
+  } else {
+    // 显示本月事件
+    const ym = `${calendarViewDate.getFullYear()}-${String(calendarViewDate.getMonth()+1).padStart(2,'0')}`;
+    events = calendarEvents.filter(e => e.date.startsWith(ym));
+  }
+
+  // 也显示计划中对应日期的事项
+  let planEvents = [];
+  for(const period of ['week','month','year']){
+    planEvents = planEvents.concat(
+      plans[period].filter(p => p.date && (selectedCalDate ? p.date === selectedCalDate : p.date.startsWith(`${calendarViewDate.getFullYear()}-${String(calendarViewDate.getMonth()+1).padStart(2,'0')}`)))
+      .map(p => ({ date: p.date, title: '📌 ' + p.text }))
+    );
+  }
+
+  const allEvents = [...events, ...planEvents];
+  if(!allEvents.length){
+    container.innerHTML = `<div class="empty-state">${selectedCalDate ? '该日期暂无事件' : '本月暂无日历事件'}</div>`;
+    return;
+  }
+  container.innerHTML = allEvents.map(e => `
+    <div class="calendar-event-item">
+      <div class="calendar-event-dot"></div>
+      <div>
+        <div>${escapeHtml(e.title)}</div>
+        ${e.date ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:2px">📅 ${e.date}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   选题灵感
+   ============================================================ */
+const HOTSPOT_DIRS = [
+  {tag:'备孕/孕产',icon:'🤰',keywords:['备孕注意事项','孕期营养','叶酸']},
+  {tag:'减脂健康',icon:'💪',keywords:['减脂餐','居家运动','健康饮食']},
+  {tag:'职场女性成长',icon:'👩‍💼',keywords:['职场提升','女性成长','时间管理']},
+  {tag:'技能学习攻略',icon:'📖',keywords:['自学攻略','技能提升','学习方法']},
+  {tag:'热门综艺/影视',icon:'🎬',keywords:['热播剧','综艺节目','影视推荐']},
+];
+
+// 抖音/小红书搜索跳转
+function searchInApp(platform, keyword){
+  let url='';
+  if(platform==='douyin') url=`snssdk1128://search?keyword=${encodeURIComponent(keyword)}`;
+  else if(platform==='xhs') url=`xhsdiscover://search?keyword=${encodeURIComponent(keyword)}`;
+  else if(platform==='browser') url=`https://www.baidu.com/s?wd=${encodeURIComponent(keyword)}`;
+
+  if(platform==='browser'){
+    window.open(url,'_blank');
+    return;
+  }
+  // 先尝试 scheme
+  const a=document.createElement('a');
+  a.href=url;
+  // 设定超时降级
+  const timer=setTimeout(()=>{
+    toast('未检测到App，打开网页搜索');
+    window.open(`https://www.baidu.com/s?wd=${encodeURIComponent(keyword)}`,'_blank');
+  },1500);
+  a.click();
+  // 如果跳转成功，visibilitychange 会触发
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);},{once:true});
+}
+
+function renderHotspots(){
+  const grid=document.getElementById('hotspotGrid');
+  grid.innerHTML = HOTSPOT_DIRS.map(dir => `
+    <div class="hotspot-card">
+      <div class="hs-tag">${dir.icon} ${dir.tag}</div>
+      <div class="hs-content">点击关键词，跳转抖音/小红书搜索最新热点</div>
+      <div class="hs-search-btns">
+        ${dir.keywords.map(kw=>`
+          <button class="btn btn-outline btn-sm" onclick="searchInApp('douyin','${escapeHtml(kw)}')" title="抖音搜索">🎵 ${escapeHtml(kw)}</button>
+        `).join('')}
+        <button class="btn btn-outline btn-sm" onclick="searchInApp('xhs','${dir.tag}')" title="小红书搜索">📕 搜小红书</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addInspiration(){
+  const input=document.getElementById('inspirationInput');
+  const text=input.value.trim();if(!text)return;
+  inspirations.unshift({id:uid(),text,status:'pending',time:Date.now()});
+  save(STORE.inspirations,inspirations);input.value='';
+  renderInspirations();toast('灵感已记录');
+}
+function toggleInspirationStatus(id){
+  const ins=inspirations.find(x=>x.id===id);
+  if(ins){ins.status=ins.status==='pending'?'used':'pending';save(STORE.inspirations,inspirations);renderInspirations();}
+}
+function deleteInspiration(id){
+  inspirations=inspirations.filter(x=>x.id!==id);
+  save(STORE.inspirations,inspirations);renderInspirations();
+}
+function renderInspirations(){
+  const list=document.getElementById('inspirationList');
+  if(!inspirations.length){list.innerHTML='<div class="empty-state">还没有灵感记录，随时记下你的想法吧</div>';return;}
+  list.innerHTML=inspirations.map(ins=>`
+    <div class="inspiration-item">
+      <div class="inspiration-text">${escapeHtml(ins.text)}</div>
+      <span class="inspiration-status ${ins.status==='pending'?'status-pending':'status-used'}" onclick="toggleInspirationStatus('${ins.id}')">${ins.status==='pending'?'待用':'已用'}</span>
+      <button class="btn-danger-text" onclick="deleteInspiration('${ins.id}')">删除</button>
+    </div>`).join('');
+}
+
+function generateTopicPrompt(){
+  const out=document.getElementById('aiTopicOutput');
+  const insTexts=inspirations.map(i=>'· '+i.text).join('\n')||'暂无';
+  const prompt=`你是一位资深的新媒体内容策划师，请帮我推荐3个具体的选题。
+
+【我的关注方向】
+备孕/孕产、减脂健康、职场女性成长、技能学习攻略、热门综艺/影视
+
+【我的灵感碎片】
+${insTexts}
+
+【过往内容数据表现】
+技能攻略 > 旅游 > 生活日常（技能攻略类数据最好）
+
+【要求】
+请推荐3个可落地的选题，每个包含：
+1. 标题
+2. 内容方向简述（100字以内）
+3. 推荐理由（结合数据表现说明）
+
+请直接输出，格式清晰。`;
+
+  out.innerHTML=`<div class="prompt-output">
+    <div class="prompt-text">${escapeHtml(prompt)}</div>
+    ${promptActionsHTML(prompt)}
+  </div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">💡 点击「分享到AI」可弹出分享面板选择豆包/DeepSeek，或点击「复制」后手动粘贴</div>`;
+}
+
+/* ============================================================
+   学习库
+   ============================================================ */
+function renderLearningNav(){
+  const nav=document.getElementById('learningNav');
+  nav.innerHTML='';
+  Object.entries(learningData.directions).forEach(([key,dir])=>{
+    const item=document.createElement('div');
+    item.className='learning-nav-item'+(currentLearningDir===key?' active':'');
+    item.innerHTML=`<span>${dir.name}</span><span class="lni-progress">${dir.progress}%</span>`;
+    item.onclick=()=>selectLearningDir(key);
+    nav.appendChild(item);
+  });
+}
+function selectLearningDir(key){
+  currentLearningDir=key;
+  renderLearningNav();
+  const dir=learningData.directions[key];
+  const detail=document.getElementById('learningDetail');
+  detail.innerHTML=`
+    <div style="margin-bottom:16px">
+      <h3 style="font-size:18px;margin-bottom:8px">${dir.name}</h3>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-size:13px;color:var(--text-secondary)">进度：</span>
+        <div class="progress-bar-container" style="flex:1;height:14px"><div class="progress-bar-fill" style="width:${dir.progress}%">${dir.progress}%</div></div>
+        <button class="btn btn-outline btn-sm" onclick="updateLearningProgress('${key}',10)">+10%</button>
+        <button class="btn btn-outline btn-sm" onclick="updateLearningProgress('${key}',-10)">-10%</button>
+      </div>
+    </div>
+    <div>
+      <h4 style="font-size:14px;margin-bottom:8px">📌 学习内容</h4>
+      <ul class="learning-content-list">
+        ${dir.contents.map(c=>`<li class="learning-content-item"><span>📖</span><span>${escapeHtml(c)}</span></li>`).join('')}
+      </ul>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="generateLearningPrompt('${key}')">🤖 AI 学习助手</button>
+      <button class="btn btn-outline" onclick="searchInApp('douyin','${dir.name.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g,'').trim()} 新手教程')">🎵 抖音搜教程</button>
+      <button class="btn btn-outline" onclick="searchInApp('xhs','${dir.name.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g,'').trim()} 入门')">📕 小红书搜</button>
+    </div>
+    <div id="learningAIOutput"></div>`;
+}
+function updateLearningProgress(key,delta){
+  const dir=learningData.directions[key];
+  dir.progress=Math.max(0,Math.min(100,dir.progress+delta));
+  save(STORE.learning,learningData);selectLearningDir(key);
+}
+function generateLearningPrompt(key){
+  const dir=learningData.directions[key];
+  const out=document.getElementById('learningAIOutput');
+  if(!out)return;
+  const prompt=`你是一位学习规划教练。请针对「${dir.name}」这个学习方向，帮我整理新手入门学习内容。
+
+请按以下结构输出：
+1. 是什么：这个学习方向的核心概念和范围
+2. 为什么学：学习的价值和意义
+3. 怎么学：推荐的学习路径和方法（分步骤）
+4. 实操练习：具体的练习建议和入门任务
+
+最后，生成一条从入门到进阶的学习路径建议。
+
+我目前的学习进度：${dir.progress}%，已学内容：${dir.contents.join('、')||'刚开始'}。请根据我的进度推荐适合当前阶段的内容。`;
+  out.innerHTML=`<div class="prompt-output" style="margin-top:14px">
+    <div class="prompt-text">${escapeHtml(prompt)}</div>
+    ${promptActionsHTML(prompt)}
+  </div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-top:6px">💡 分享给豆包/DeepSeek 获取结构化学习内容</div>`;
+}
+
+/* ============================================================
+   成长复盘
+   ============================================================ */
+function selectReviewType(type){
+  currentReviewType=type;
+  document.querySelectorAll('.review-entry-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
+  document.getElementById('reviewOutput').innerHTML='<div class="empty-state">点击「生成复盘提示词」，自动汇总本期数据</div>';
+}
+function generateReviewPrompt(){
+  const out=document.getElementById('reviewOutput');
+  const typeMap={week:'本周',month:'本月',quarter:'本季度'};
+  const period=typeMap[currentReviewType];
+  const taskSummary=`任务总数${[1,2,3].reduce((s,c)=>s+tasks.categories[c].length,0)}个，已完成${[1,2,3].reduce((s,c)=>s+tasks.categories[c].filter(t=>t.done).length,0)}个`;
+  const learningProgress=Object.values(learningData.directions).map(d=>`${d.name}:${d.progress}%`).join('，');
+
+  const prompt=`你是一位成长教练，请帮我生成${period}的复盘初稿。
+
+【本期数据摘要】
+- 每日计划：${taskSummary}
+- 备忘录记录：${memos.length}条
+- 选题灵感：记录${inspirations.length}个，已使用${inspirations.filter(i=>i.status==='used').length}个
+- 学习进度：${learningProgress}
+- 复盘周期：${period}
+
+请按以下结构生成复盘初稿（每部分2-3句话）：
+1. 回顾目标：该周期的主要目标
+2. 完成情况：目标完成度
+3. 关键成果：实际取得的成果
+4. 遇阻卡点：遇到的问题和挑战
+5. 调整策略：下周期的改进方向
+6. 一句话总结
+
+请直接输出，格式清晰。`;
+
+  out.innerHTML=`<div class="prompt-output">
+    <div class="prompt-text">${escapeHtml(prompt)}</div>
+    ${promptActionsHTML(prompt)}
+  </div>
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-success btn-sm" onclick="saveReviewManual()">💾 手动保存复盘</button>
+    <span style="font-size:12px;color:var(--text-secondary);line-height:2">💡 从 AI 获取结果后，可复制回来手动保存到归档</span>
+  </div>
+  <textarea class="textarea" id="reviewManualInput" placeholder="把 AI 生成的复盘内容粘贴到这里，然后点击「手动保存复盘」..." style="margin-top:10px;min-height:120px"></textarea>`;
+}
+function saveReviewManual(){
+  const input=document.getElementById('reviewManualInput');
+  const text=input?.value.trim();
+  if(!text){toast('请先粘贴复盘内容');return;}
+  reviews.unshift({
+    id:uid(),type:currentReviewType,
+    date:new Date().toLocaleDateString('zh-CN'),
+    timestamp:Date.now(),
+    content:[{title:'复盘内容',content:text}],
+    summary:text.slice(0,60),
+  });
+  save(STORE.reviews,reviews);
+  renderReviewTimeline();
+  input.value='';
+  toast('复盘已保存到归档');
+}
+function renderReviewTimeline(){
+  const list=document.getElementById('reviewTimeline');
+  const search=document.getElementById('reviewSearch')?.value?.toLowerCase()||'';
+  const filtered=reviews.filter(r=>!search||r.summary.toLowerCase().includes(search)||r.type.includes(search)||r.date.includes(search));
+  if(!filtered.length){list.innerHTML='<div class="empty-state">暂无历史复盘记录</div>';return;}
+  const typeLabel={week:'周复盘',month:'月复盘',quarter:'季度复盘'};
+  list.innerHTML=filtered.map(r=>`
+    <div class="review-timeline-item" onclick='showReviewDetail("${r.id}")'>
+      <div class="rti-type">${typeLabel[r.type]||r.type}</div>
+      <div class="rti-date">${r.date}</div>
+      <div class="rti-summary">${escapeHtml(r.summary)}</div>
+    </div>`).join('');
+}
+function showReviewDetail(id){
+  const r=reviews.find(x=>x.id===id);if(!r)return;
+  const out=document.getElementById('reviewOutput');
+  out.innerHTML=`<div style="margin-bottom:10px;color:var(--text-secondary);font-size:12px">📂 查看历史复盘 · ${r.date}</div>`+
+    (r.content||[]).map(s=>`<div class="review-section"><h4>${escapeHtml(s.title)}</h4><p>${escapeHtml(s.content)}</p></div>`).join('');
+}
+
+/* ============================================================
+   备忘录
+   ============================================================ */
+const MEMO_TAGS=['#工作','#生活','#创作灵感','#健康','#学习','#情绪记录'];
+function renderTagSelector(){
+  const sel=document.getElementById('memoTagSelector');
+  if(!sel)return;
+  sel.innerHTML=MEMO_TAGS.map(t=>
+    `<span class="tag-option ${selectedMemoTags.includes(t)?'selected':''}" onclick="toggleMemoTag('${t}')">${t}</span>`
+  ).join('');
+}
+function toggleMemoTag(tag){
+  const i=selectedMemoTags.indexOf(tag);
+  if(i>=0)selectedMemoTags.splice(i,1);
+  else selectedMemoTags.push(tag);
+  renderTagSelector();
+}
+function setMemoFilter(tag){
+  currentMemoFilter=tag;
+  document.querySelectorAll('.memo-tag-filter').forEach(f=>f.classList.toggle('active',f.dataset.tag===tag));
+  renderMemoList();
+}
+function addMemo(){
+  const input=document.getElementById('memoInput');
+  const text=input.value.trim();if(!text)return;
+  memos.unshift({id:uid(),content:text,tags:[...selectedMemoTags],time:Date.now()});
+  save(STORE.memos,memos);
+  input.value='';selectedMemoTags=[];
+  renderTagSelector();renderMemoList();
+  toast('记录已保存');
+}
+function deleteMemo(id){
+  memos=memos.filter(m=>m.id!==id);
+  save(STORE.memos,memos);renderMemoList();toast('已删除');
+}
+function renderMemoList(){
+  const list=document.getElementById('memoList');
+  const search=document.getElementById('memoSearch')?.value?.toLowerCase()||'';
+  let filtered=memos;
+  if(currentMemoFilter!=='all')filtered=filtered.filter(m=>m.tags&&m.tags.includes(currentMemoFilter));
+  if(search)filtered=filtered.filter(m=>m.content.toLowerCase().includes(search));
+  if(!filtered.length){
+    list.innerHTML='<div class="empty-state">'+(memos.length?'没有匹配的记录':'还没有记录，写下你的第一条备忘吧')+'</div>';
+    return;
+  }
+  list.innerHTML=filtered.map(m=>`
+    <div class="memo-item">
+      <div class="memo-content">${escapeHtml(m.content)}</div>
+      <div class="memo-meta">
+        ${(m.tags||[]).map(t=>`<span class="memo-tag">${escapeHtml(t)}</span>`).join('')}
+        <span class="memo-time">${new Date(m.time).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+        <button class="memo-delete" onclick="deleteMemo('${m.id}')">删除</button>
+      </div>
+    </div>`).join('');
+}
+function generateMemoTagPrompt(){
+  const input=document.getElementById('memoInput');
+  const text=input.value.trim();
+  if(!text){toast('请先输入备忘内容');return;}
+  const prompt=`请为以下备忘录内容打标签分类。可选标签：#工作 #生活 #创作灵感 #健康 #学习 #情绪记录。
+可以打多个标签，只返回标签名称（用空格分隔），不要有其他文字。
+
+备忘录内容："${text}"`;
+  const out=document.createElement('div');
+  out.innerHTML=`<div class="prompt-output" style="margin-top:10px">
+    <div class="prompt-text">${escapeHtml(prompt)}</div>
+    ${promptActionsHTML(prompt)}
+  </div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-top:6px">💡 发给豆包/DeepSeek 后，把返回的标签手动点选即可</div>`;
+  // 插入到记录区下方
+  const card=input.closest('.card');
+  const existing=card.querySelector('.prompt-output');
+  if(existing)existing.remove();
+  card.appendChild(out);
+}
+
+/* ============================================================
+   初始化
+   ============================================================ */
+function init(){
+  const d=new Date();
+  const weekdays=['周日','周一','周二','周三','周四','周五','周六'];
+  document.getElementById('todayDate').textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${weekdays[d.getDay()]}`;
+  renderAppLauncher();
+  renderAppDrawer();
+  renderTasks();
+  renderPlanList();
+  renderCalendar();
+  renderInspirations();
+  renderHotspots();
+  renderLearningNav();
+  renderReviewTimeline();
+  renderMemoList();
+  renderTagSelector();
+  // 晚间提醒
+  setInterval(()=>{
+    const h=new Date().getHours();
+    if(h===20||h===21){
+      const todo=[1,2,3].reduce((s,c)=>s+tasks.categories[c].filter(t=>!t.done).length,0);
+      if(todo>0)toast(`⏰ 温馨提醒：今日还有 ${todo} 个任务未完成`);
+    }
+  },3600000);
+  toast('工作台已就绪 🌱');
+}
+init();
+</script>
+</body>
+</html>
