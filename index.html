@@ -110,12 +110,6 @@
   .prompt-text { font-size: 13px; line-height: 1.7; white-space: pre-wrap; color: var(--text-primary); margin-bottom: 10px; max-height: 300px; overflow-y: auto; }
   .prompt-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
-  .learning-nav { display: flex; flex-direction: column; gap: 3px; }
-  .learning-nav-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s; border: 1px solid transparent; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-  .learning-nav-item:hover { background: var(--bg-hover); }
-  .learning-nav-item.active { background: var(--accent); color: white; }
-  .learning-nav-item .lni-progress { font-size: 11px; opacity: 0.8; }
-
   .review-entries { display: flex; gap: 8px; margin-bottom: 14px; }
   .review-entry-btn { flex: 1; padding: 14px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-align: center; }
   .review-entry-btn:hover, .review-entry-btn.active { border-color: var(--accent); background: #f0f7ff; }
@@ -192,7 +186,7 @@
   <ul class="nav-menu" id="navMenu">
     <li class="nav-item active" data-panel="daily-plan"><span class="icon">📋</span><span>每日计划</span></li>
     <li class="nav-item" data-panel="topics"><span class="icon">💡</span><span>选题灵感</span></li>
-    <li class="nav-item" data-panel="learning"><span class="icon">📚</span><span>学习库</span></li>
+    <li class="nav-item" data-panel="pregnancy"><span class="icon">🤰</span><span>孕期记录</span></li>
     <li class="nav-item" data-panel="review"><span class="icon">🔄</span><span>成长复盘</span></li>
     <li class="nav-item" data-panel="memo"><span class="icon">📝</span><span>备忘录</span></li>
   </ul>
@@ -283,8 +277,8 @@
       <div class="subtitle">追踪热点 · 记录灵感 · 一键发给 AI 选题</div>
     </div>
     <div class="card">
-      <div class="card-title">🔥 热点追踪 <span style="font-size:12px;color:var(--text-secondary);font-weight:normal">点击搜索</span></div>
-      <div class="hotspot-grid" id="hotspotGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px"></div>
+      <div class="card-title">🔥 热点追踪 <span style="font-size:12px;color:var(--text-secondary);font-weight:normal">点击查看热榜</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px" id="hotspotGrid"></div>
     </div>
     <div class="card">
       <div class="card-title">✏️ 灵感记录区</div>
@@ -300,15 +294,89 @@
     </div>
   </div>
 
-  <!-- ===== 学习库 ===== -->
-  <div class="panel-content" id="panel-learning">
+  <!-- ===== 孕期记录 ===== -->
+  <div class="panel-content" id="panel-pregnancy">
     <div class="panel-header">
-      <h2>📚 学习库</h2>
-      <div class="subtitle">AI 筛选优质资料 · 点击直接跳转学习</div>
+      <h2>🤰 孕期记录</h2>
+      <div class="subtitle">记录每一天的孕育时光</div>
     </div>
-    <div style="display:grid;grid-template-columns:200px 1fr;gap:14px" id="learningLayout">
-      <div class="learning-nav" id="learningNav"></div>
-      <div id="learningDetail"><div class="empty-state">请从左侧选择一个学习方向</div></div>
+
+    <!-- 孕周卡片 -->
+    <div class="card" style="background:linear-gradient(135deg,#fdf2f8,#fce7f3);border:1px solid #f9a8d4">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:13px;color:#be185d;margin-bottom:4px">当前孕周</div>
+          <div style="font-size:28px;font-weight:700;color:#9d174d" id="pregWeek">--</div>
+          <div style="font-size:12px;color:#be185d" id="pregWeekDetail">--</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:12px;color:#be185d">预产期</div>
+          <div style="font-size:15px;font-weight:600;color:#9d174d" id="pregDueDate">--</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:12px;color:#be185d">距宝宝见面</div>
+          <div style="font-size:24px;font-weight:700;color:#e11d48" id="pregCountdown">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 快速记录区 -->
+    <div class="card">
+      <div class="card-title">📝 每日快速记录 <span style="font-size:12px;color:var(--text-secondary);font-weight:normal" id="pregTodayLabel"></span></div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px">身体感受</label>
+        <input type="text" class="input" id="pregFeeling" placeholder="今天身体有什么变化？">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px">心情</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="pregMoodSelector">
+          <span class="tag-option" onclick="selectPregMood('😊 开心')">😊 开心</span>
+          <span class="tag-option" onclick="selectPregMood('😌 平静')">😌 平静</span>
+          <span class="tag-option" onclick="selectPregMood('😔 低落')">😔 低落</span>
+          <span class="tag-option" onclick="selectPregMood('😰 焦虑')">😰 焦虑</span>
+          <span class="tag-option" onclick="selectPregMood('😴 疲惫')">😴 疲惫</span>
+          <span class="tag-option" onclick="selectPregMood('🤢 孕吐')">🤢 孕吐</span>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px">叶酸</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="pregFolic" style="width:18px;height:18px;accent-color:var(--success)"> <span style="font-size:14px">☑ 已补充</span>
+        </label>
+      </div>
+      <button class="btn btn-primary" onclick="savePregDaily()">保存今日记录</button>
+    </div>
+
+    <!-- 产检档案 -->
+    <div class="card">
+      <div class="card-title">🏥 产检档案 <button class="btn btn-primary btn-sm" onclick="addCheckup()">+ 添加</button></div>
+      <div id="checkupList"><div class="empty-state">暂无产检记录</div></div>
+    </div>
+
+    <!-- 体重趋势 -->
+    <div class="card">
+      <div class="card-title">⚖️ 体重趋势 <button class="btn btn-outline btn-sm" onclick="addWeight()">+ 记录体重</button></div>
+      <canvas id="weightChart" style="width:100%;height:200px"></canvas>
+      <div id="weightList" style="margin-top:10px"></div>
+    </div>
+
+    <!-- 孕期第一次 -->
+    <div class="card">
+      <div class="card-title">🌟 孕期的"第一次" <button class="btn btn-primary btn-sm" onclick="addFirstTime()">+ 记录</button></div>
+      <div id="firstTimeList"><div class="empty-state">暂无记录</div></div>
+    </div>
+
+    <!-- 写给宝宝日记 -->
+    <div class="card">
+      <div class="card-title">💌 写给宝宝日记 <button class="btn btn-primary btn-sm" onclick="addBabyDiary()">写一篇</button></div>
+      <div id="babyDiaryList"><div class="empty-state">还没有日记，记录你想对宝宝说的话</div></div>
+    </div>
+
+    <!-- 备忘录联动 -->
+    <div class="card" style="background:#fdf2f8;border:1px solid #f9a8d4">
+      <div class="card-title">📌 孕期碎片想法</div>
+      <div style="font-size:12px;color:#be185d;margin-bottom:8px">来自备忘录中 #孕期 标签的记录</div>
+      <div id="pregMemoList"><div class="empty-state">暂无孕期备忘</div></div>
     </div>
   </div>
 
@@ -360,6 +428,7 @@
         <span class="memo-tag-filter" data-tag="#健康" onclick="setMemoFilter('#健康')">#健康</span>
         <span class="memo-tag-filter" data-tag="#学习" onclick="setMemoFilter('#学习')">#学习</span>
         <span class="memo-tag-filter" data-tag="#情绪记录" onclick="setMemoFilter('#情绪记录')">#情绪记录</span>
+        <span class="memo-tag-filter" data-tag="#孕期" onclick="setMemoFilter('#孕期')">#孕期</span>
       </div>
       <div id="memoList"></div>
     </div>
@@ -373,7 +442,7 @@
 <nav class="mobile-bottom-nav" id="mobileNav">
   <button class="mobile-nav-item active" data-panel="daily-plan"><span class="m-icon">📋</span><span>每日计划</span></button>
   <button class="mobile-nav-item" data-panel="topics"><span class="m-icon">💡</span><span>选题灵感</span></button>
-  <button class="mobile-nav-item" data-panel="learning"><span class="m-icon">📚</span><span>学习库</span></button>
+  <button class="mobile-nav-item" data-panel="pregnancy"><span class="m-icon">🤰</span><span>孕期</span></button>
   <button class="mobile-nav-item" data-panel="review"><span class="m-icon">🔄</span><span>复盘</span></button>
   <button class="mobile-nav-item" data-panel="memo"><span class="m-icon">📝</span><span>备忘录</span></button>
 </nav>
@@ -386,7 +455,7 @@
 
 <script>
 /* ===== 数据层 ===== */
-const STORE = { tasks:'gw_tasks_v3', inspirations:'gw_inspirations', learning:'gw_learning', reviews:'gw_reviews', memos:'gw_memos' };
+const STORE = { tasks:'gw_tasks_v3', inspirations:'gw_inspirations', pregnancy:'gw_pregnancy_v1', reviews:'gw_reviews', memos:'gw_memos' };
 function load(k,d){ try{return JSON.parse(localStorage.getItem(k))??d}catch{return d} }
 function save(k,v){ localStorage.setItem(k,JSON.stringify(v)) }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7) }
@@ -394,7 +463,7 @@ function todayKey(){ const d=new Date(); return `${d.getFullYear()}-${String(d.g
 
 let allTasks = load(STORE.tasks, {}); // { "2026-07-25": { categories: {1:[...],2:[...],3:[...]} } }
 let inspirations = load(STORE.inspirations, []);
-let learningData = load(STORE.learning, null);
+let pregnancyData = load(STORE.pregnancy, null);
 let reviews = load(STORE.reviews, []);
 let memos = load(STORE.memos, []);
 let currentReviewType = 'week';
@@ -403,6 +472,7 @@ let selectedMemoTags = [];
 let calendarViewDate = new Date();
 let selectedCalDate = todayKey(); // 默认选中今天
 let viewingDate = todayKey(); // 当前查看的日期
+let selectedPregMood = '';
 
 // 健身2+1逻辑：从7.25开始，2天力量+有氧，1天有氧，循环
 function getFitnessTask(dateStr) {
@@ -443,6 +513,10 @@ function getDailyMustDo(dateStr) {
   tasks.push({ id: uid(), text: '维生素', done: false, fixed: true, type: 'vitamin' });
   tasks.push({ id: uid(), text: '叶酸补充', done: false, fixed: true, type: 'folic' });
 
+  // ⑨ 孕期相关（自动注入）
+  tasks.push({ id: uid(), text: '孕期体重记录', done: false, fixed: true, type: 'preg_weight' });
+  tasks.push({ id: uid(), text: '📝 孕期日记/快速记录', done: false, fixed: true, type: 'preg_diary' });
+
   return tasks;
 }
 
@@ -471,18 +545,20 @@ function getDayTasks(dateStr) {
   return allTasks[dateStr];
 }
 
-// 默认学习库
-function getDefaultLearning(){
-  return { directions: {
-    'video': {name:'🎬 视频创作',progress:0,contents:['热点爆点分析','剪辑技巧','平台算法']},
-    'ps': {name:'🎨 PS技能',progress:0,contents:['基础工具','修图实战']},
-    'shooting': {name:'📷 拍摄技能',progress:0,contents:['构图','光线','手机摄影']},
-    'english': {name:'🗣️ 英语练习',progress:0,contents:['日常对话','听力训练']},
-    'calligraphy': {name:'✒️ 硬笔书法',progress:0,contents:['行楷基础','每日练字']},
-    'finance': {name:'💰 理财知识',progress:0,contents:['基金定投','家庭资产配置','新手入门']},
-  }};
+// 孕期数据初始化（LMP=2026-06-29）
+const LMP_DATE = new Date(2026, 5, 29); // 月份从0开始，6月=5
+const EDC_DATE = new Date(LMP_DATE.getTime() + 280*24*60*60*1000); // 预产期=LMP+280天
+function getDefaultPregnancy(){
+  return {
+    lmp: '2026-06-29',
+    dailyRecords: {}, // { "2026-07-25": { feeling, mood, folic } }
+    checkups: [],     // [ { id, date, week, hospital, items, note } ]
+    weights: [],      // [ { id, date, weight } ]
+    firstTimes: [],   // [ { id, date, title, note } ]
+    diaries: [],      // [ { id, date, content } ]
+  };
 }
-if(!learningData){ learningData=getDefaultLearning(); save(STORE.learning,learningData); }
+if(!pregnancyData){ pregnancyData=getDefaultPregnancy(); save(STORE.pregnancy,pregnancyData); }
 
 /* ===== App配置 ===== */
 const APPS = [
@@ -550,7 +626,7 @@ function switchPanel(panel, clickedItem){
   document.getElementById('panel-'+panel).classList.add('active');
   if(panel==='daily-plan'){ viewingDate=todayKey(); selectedCalDate=todayKey(); calendarViewDate=new Date(); renderCalendar(); renderTasks(); }
   if(panel==='topics') renderInspirations();
-  if(panel==='learning') renderLearningNav();
+  if(panel==='pregnancy') renderPregnancy();
   if(panel==='review') renderReviewTimeline();
   if(panel==='memo'){ renderMemoList(); renderTagSelector(); }
   document.querySelector('.main-panel').scrollTop = 0;
@@ -757,14 +833,44 @@ function searchInApp(platform, keyword){
   document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);},{once:true});
 }
 function renderHotspots(){
-  document.getElementById('hotspotGrid').innerHTML = HOTSPOT_DIRS.map(dir => `
-    <div style="background:linear-gradient(135deg,#fff5f5,#fff0f0);border:1px solid #ffccc7;border-radius:10px;padding:12px">
-      <div style="font-size:11px;color:var(--danger);font-weight:600;margin-bottom:5px">${dir.icon} ${dir.tag}</div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap">
-        ${dir.keywords.map(kw=>`<button class="btn btn-outline btn-sm" onclick="searchInApp('douyin','${escapeHtml(kw)}')">🎵 ${escapeHtml(kw)}</button>`).join('')}
-        <button class="btn btn-outline btn-sm" onclick="searchInApp('xhs','${dir.tag}')">📕 小红书</button>
-      </div>
+  const hotLinks = [
+    { name:'抖音热搜榜', icon:'🎵', desc:'实时热点TOP50', url:'https://www.douyin.com/hot', app:'douyin' },
+    { name:'抖音热榜', icon:'🔥', desc:'最热话题榜', url:'https://www.douyin.com/hot', app:'douyin' },
+    { name:'小红书热搜', icon:'📕', desc:'本周热门话题', url:'https://www.xiaohongshu.com/explore', app:'xhs' },
+    { name:'小红书趋势', icon:'📈', desc:'发现热门内容', url:'https://www.xiaohongshu.com/explore', app:'xhs' },
+    { name:'微博热搜', icon:'💬', desc:'全网热点', url:'https://s.weibo.com/top/summary', app:'browser' },
+    { name:'百度热搜', icon:'🔍', desc:'搜索热点', url:'https://top.baidu.com/board?tab=realtime', app:'browser' },
+    { name:'知乎热榜', icon:'💡', desc:'热门讨论', url:'https://www.zhihu.com/hot', app:'browser' },
+    { name:'B站热门', icon:'📺', desc:'热门视频', url:'https://www.bilibili.com/v/popular/all', app:'browser' },
+  ];
+  document.getElementById('hotspotGrid').innerHTML = hotLinks.map((h,i) => `
+    <div style="background:linear-gradient(135deg,#fff5f5,#fff0f0);border:1px solid #ffccc7;border-radius:10px;padding:14px;cursor:pointer;transition:transform 0.2s" onclick="openHotspot(${i})" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+      <div style="font-size:24px;margin-bottom:4px">${h.icon}</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:2px">${h.name}</div>
+      <div style="font-size:11px;color:var(--text-secondary)">${h.desc}</div>
     </div>`).join('');
+}
+function openHotspot(index){
+  const hotLinks = [
+    { name:'抖音热搜榜', icon:'🎵', desc:'实时热点TOP50', url:'https://www.douyin.com/hot', app:'douyin' },
+    { name:'抖音热榜', icon:'🔥', desc:'最热话题榜', url:'https://www.douyin.com/hot', app:'douyin' },
+    { name:'小红书热搜', icon:'📕', desc:'本周热门话题', url:'https://www.xiaohongshu.com/explore', app:'xhs' },
+    { name:'小红书趋势', icon:'📈', desc:'发现热门内容', url:'https://www.xiaohongshu.com/explore', app:'xhs' },
+    { name:'微博热搜', icon:'💬', desc:'全网热点', url:'https://s.weibo.com/top/summary', app:'browser' },
+    { name:'百度热搜', icon:'🔍', desc:'搜索热点', url:'https://top.baidu.com/board?tab=realtime', app:'browser' },
+    { name:'知乎热榜', icon:'💡', desc:'热门讨论', url:'https://www.zhihu.com/hot', app:'browser' },
+    { name:'B站热门', icon:'📺', desc:'热门视频', url:'https://www.bilibili.com/v/popular/all', app:'browser' },
+  ];
+  const h = hotLinks[index];
+  if(h.app==='browser'){ window.open(h.url,'_blank'); return; }
+  // 尝试App跳转，失败则打开网页版
+  let scheme='';
+  if(h.app==='douyin') scheme='snssdk1128://search?keyword=热搜';
+  else if(h.app==='xhs') scheme='xhsdiscover://explore';
+  const a=document.createElement('a'); a.href=scheme;
+  const timer=setTimeout(()=>{ window.open(h.url,'_blank'); },1500);
+  a.click();
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);},{once:true});
 }
 function addInspiration(){
   const input=document.getElementById('inspirationInput');
@@ -799,68 +905,225 @@ function generateTopicPrompt(){
   out.innerHTML=`<div class="prompt-output"><div class="prompt-text">${escapeHtml(prompt)}</div>${promptActionsHTML(prompt)}</div>`;
 }
 
-/* ===== 学习库（AI筛选+直接跳转） ===== */
-let currentLearningDir = null;
-function renderLearningNav(){
-  const nav=document.getElementById('learningNav');
-  nav.innerHTML='';
-  Object.entries(learningData.directions).forEach(([key,dir])=>{
-    const item=document.createElement('div');
-    item.className='learning-nav-item'+(currentLearningDir===key?' active':'');
-    item.innerHTML=`<span>${dir.name}</span><span class="lni-progress">${dir.progress}%</span>`;
-    item.onclick=()=>selectLearningDir(key);
-    nav.appendChild(item);
+/* ===== 孕期记录 ===== */
+function getPregWeekInfo(){
+  const now = new Date();
+  const diffDays = Math.floor((now - LMP_DATE) / (1000*60*60*24));
+  if(diffDays < 0) return { week:0, day:0, totalDays:0, weekLabel:'未到孕期', countdown:0 };
+  const week = Math.floor(diffDays / 7);
+  const day = diffDays % 7;
+  const totalDays = 280;
+  const countdown = Math.max(0, 280 - diffDays);
+  const trimester = week < 13 ? '孕早期' : (week < 28 ? '孕中期' : '孕晚期');
+  return { week, day, totalDays, weekLabel:`第${week}周+${day}天`, countdown, trimester, diffDays };
+}
+function renderPregnancy(){
+  const info = getPregWeekInfo();
+  document.getElementById('pregWeek').textContent = info.week > 0 ? `${info.week}周+${info.day}天` : '未到孕期';
+  document.getElementById('pregWeekDetail').textContent = info.week > 0 ? `${info.trimester} · 已孕${info.diffDays}天` : '';
+  const edcStr = `${EDC_DATE.getFullYear()}-${String(EDC_DATE.getMonth()+1).padStart(2,'0')}-${String(EDC_DATE.getDate()).padStart(2,'0')}`;
+  document.getElementById('pregDueDate').textContent = edcStr;
+  document.getElementById('pregCountdown').textContent = info.countdown > 0 ? `${info.countdown}天` : '已到期';
+  document.getElementById('pregTodayLabel').textContent = todayKey();
+
+  // 恢复今日记录
+  const todayRecord = pregnancyData.dailyRecords[todayKey()] || {};
+  document.getElementById('pregFeeling').value = todayRecord.feeling || '';
+  document.getElementById('pregFolic').checked = !!todayRecord.folic;
+  selectedPregMood = todayRecord.mood || '';
+  renderPregMoodSelector();
+
+  renderCheckupList();
+  renderWeightChart();
+  renderFirstTimeList();
+  renderBabyDiaryList();
+  renderPregMemoList();
+}
+function selectPregMood(mood){
+  selectedPregMood = mood;
+  renderPregMoodSelector();
+}
+function renderPregMoodSelector(){
+  document.getElementById('pregMoodSelector').querySelectorAll('.tag-option').forEach(el=>{
+    el.classList.toggle('selected', el.textContent.trim() === selectedPregMood);
   });
 }
-function selectLearningDir(key){
-  currentLearningDir=key;
-  renderLearningNav();
-  const dir=learningData.directions[key];
-  const cleanName=dir.name.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g,'').trim();
-  const detail=document.getElementById('learningDetail');
-  detail.innerHTML=`
-    <div style="margin-bottom:14px">
-      <h3 style="font-size:18px;margin-bottom:6px">${dir.name}</h3>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-        <span style="font-size:13px;color:var(--text-secondary)">进度：</span>
-        <div class="progress-bar-container" style="flex:1;height:14px"><div class="progress-bar-fill" style="width:${dir.progress}%">${dir.progress}%</div></div>
-        <button class="btn btn-outline btn-sm" onclick="updateLearningProgress('${key}',10)">+10%</button>
-      </div>
-    </div>
-    <div style="margin-bottom:14px">
-      <h4 style="font-size:14px;margin-bottom:8px">📌 学习内容</h4>
-      <ul style="list-style:none">
-        ${dir.contents.map(c=>`<li style="padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;gap:6px"><span>📖</span><span>${escapeHtml(c)}</span></li>`).join('')}
-      </ul>
-    </div>
-    <div style="margin-top:10px">
-      <h4 style="font-size:14px;margin-bottom:8px">🔍 AI 筛选学习资料（点击跳转）</h4>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px">
-        <button class="btn btn-primary" onclick="searchInApp('douyin','${cleanName} 新手入门教程')">🎵 抖音搜教程</button>
-        <button class="btn btn-outline" onclick="searchInApp('xhs','${cleanName} 入门攻略')">📕 小红书搜</button>
-        <button class="btn btn-outline" onclick="searchInApp('browser','${cleanName} 新手入门教程 B站')">🖥️ B站搜</button>
-        <button class="btn btn-outline" onclick="generateLearningPrompt('${key}')">🤖 AI学习提示词</button>
-      </div>
-      <div id="learningAIOutput" style="margin-top:10px"></div>
-    </div>`;
+function savePregDaily(){
+  const feeling = document.getElementById('pregFeeling').value.trim();
+  const folic = document.getElementById('pregFolic').checked;
+  pregnancyData.dailyRecords[todayKey()] = { feeling, mood: selectedPregMood, folic };
+  save(STORE.pregnancy, pregnancyData);
+  // 联动：叶酸同步到每日计划
+  const dayData = getDayTasks(todayKey());
+  const folicTask = dayData.categories[1].find(t => t.type === 'folic');
+  if(folicTask){ folicTask.done = folic; save(STORE.tasks, allTasks); renderTasks(); }
+  toast('✅ 今日孕期记录已保存');
 }
-function updateLearningProgress(key,delta){
-  const dir=learningData.directions[key];
-  dir.progress=Math.max(0,Math.min(100,dir.progress+delta));
-  save(STORE.learning,learningData); selectLearningDir(key);
+// 产检档案
+function addCheckup(){
+  const date = prompt('产检日期（YYYY-MM-DD）：', todayKey());
+  if(!date) return;
+  const week = prompt('孕周（如：12周）：', '');
+  const hospital = prompt('医院：', '');
+  const items = prompt('检查项目（逗号分隔）：', '');
+  const note = prompt('备注/结果：', '');
+  pregnancyData.checkups.push({ id:uid(), date, week, hospital, items, note });
+  save(STORE.pregnancy, pregnancyData);
+  renderCheckupList(); toast('产检记录已添加');
 }
-function generateLearningPrompt(key){
-  const dir=learningData.directions[key];
-  const out=document.getElementById('learningAIOutput');
-  if(!out) return;
-  const prompt=`请针对「${dir.name}」帮我整理新手入门学习内容，按以下结构：
-1. 是什么：核心概念
-2. 为什么学：学习价值
-3. 怎么学：学习路径和方法（分步骤）
-4. 实操练习：入门任务
-最后生成从入门到进阶的学习路径建议。
-当前进度：${dir.progress}%，已学：${dir.contents.join('、')}。`;
-  out.innerHTML=`<div class="prompt-output"><div class="prompt-text">${escapeHtml(prompt)}</div>${promptActionsHTML(prompt)}</div>`;
+function deleteCheckup(id){
+  pregnancyData.checkups = pregnancyData.checkups.filter(c=>c.id!==id);
+  save(STORE.pregnancy, pregnancyData); renderCheckupList(); toast('已删除');
+}
+function renderCheckupList(){
+  const list = document.getElementById('checkupList');
+  if(!pregnancyData.checkups.length){ list.innerHTML='<div class="empty-state">暂无产检记录</div>'; return; }
+  const sorted = [...pregnancyData.checkups].sort((a,b)=>b.date.localeCompare(a.date));
+  list.innerHTML = sorted.map(c=>`
+    <div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
+        <span style="font-weight:600;font-size:14px">${escapeHtml(c.date)} ${c.week?'· '+escapeHtml(c.week):''}</span>
+        <button class="btn-danger-text" onclick="deleteCheckup('${c.id}')">删除</button>
+      </div>
+      ${c.hospital?`<div style="font-size:12px;color:var(--accent);margin-top:4px">🏥 ${escapeHtml(c.hospital)}</div>`:''}
+      ${c.items?`<div style="font-size:13px;margin-top:4px">📋 ${escapeHtml(c.items)}</div>`:''}
+      ${c.note?`<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${escapeHtml(c.note)}</div>`:''}
+    </div>`).join('');
+}
+// 体重趋势
+function addWeight(){
+  const weight = parseFloat(prompt('今日体重（kg）：', ''));
+  if(!weight || weight<=0) return;
+  pregnancyData.weights.push({ id:uid(), date:todayKey(), weight });
+  save(STORE.pregnancy, pregnancyData);
+  renderWeightChart(); toast('体重已记录');
+}
+function deleteWeight(id){
+  pregnancyData.weights = pregnancyData.weights.filter(w=>w.id!==id);
+  save(STORE.pregnancy, pregnancyData); renderWeightChart(); toast('已删除');
+}
+function renderWeightChart(){
+  const canvas = document.getElementById('weightChart');
+  const list = document.getElementById('weightList');
+  const ctx = canvas.getContext('2d');
+  // 适配高分辨率
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth, h = 200;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const weights = [...pregnancyData.weights].sort((a,b)=>a.date.localeCompare(b.date));
+  if(weights.length === 0){
+    ctx.fillStyle = '#7f8c8d'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('暂无体重数据，点击上方按钮开始记录', w/2, h/2);
+    list.innerHTML = '';
+    return;
+  }
+  const values = weights.map(x=>x.weight);
+  const minV = Math.min(...values) - 1, maxV = Math.max(...values) + 1;
+  const padL = 40, padR = 15, padT = 15, padB = 30;
+  const cw = w - padL - padR, ch = h - padT - padB;
+
+  // Y轴刻度
+  ctx.strokeStyle = '#e0e0e0'; ctx.fillStyle = '#7f8c8d'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+  for(let i=0;i<=4;i++){
+    const y = padT + ch * i / 4;
+    const val = (maxV - (maxV-minV)*i/4).toFixed(1);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w-padR, y); ctx.stroke();
+    ctx.fillText(val, padL-4, y+3);
+  }
+  // 折线
+  ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 2; ctx.beginPath();
+  weights.forEach((wd, i) => {
+    const x = padL + (weights.length===1 ? cw/2 : cw * i / (weights.length-1));
+    const y = padT + ch * (maxV - wd.weight) / (maxV - minV);
+    if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  // 数据点
+  ctx.fillStyle = '#e11d48';
+  weights.forEach((wd, i) => {
+    const x = padL + (weights.length===1 ? cw/2 : cw * i / (weights.length-1));
+    const y = padT + ch * (maxV - wd.weight) / (maxV - minV);
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, 2*Math.PI); ctx.fill();
+  });
+  // X轴日期
+  ctx.fillStyle = '#7f8c8d'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+  weights.forEach((wd, i) => {
+    if(weights.length > 8 && i % Math.ceil(weights.length/6) !== 0 && i !== weights.length-1) return;
+    const x = padL + (weights.length===1 ? cw/2 : cw * i / (weights.length-1));
+    ctx.fillText(wd.date.slice(5), x, h-8);
+  });
+
+  // 列表
+  const recent = [...weights].reverse();
+  list.innerHTML = `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">最近记录（共${weights.length}条）：${weights[0].weight}kg → ${weights[weights.length-1].weight}kg ${weights.length>1?`(${(weights[weights.length-1].weight-weights[0].weight).toFixed(1)}kg)`:''}</div>` +
+    recent.slice(0,5).map(wd=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0"><span>${wd.date}</span><span><b>${wd.weight}kg</b> <button class="btn-danger-text" onclick="deleteWeight('${wd.id}')">删</button></span></div>`).join('');
+}
+// 孕期第一次
+function addFirstTime(){
+  const title = prompt('第一次的什么？（如：第一次胎动）', '');
+  if(!title) return;
+  const date = prompt('日期：', todayKey());
+  const note = prompt('详细描述：', '');
+  pregnancyData.firstTimes.push({ id:uid(), title, date, note });
+  save(STORE.pregnancy, pregnancyData);
+  renderFirstTimeList(); toast('已记录');
+}
+function deleteFirstTime(id){
+  pregnancyData.firstTimes = pregnancyData.firstTimes.filter(f=>f.id!==id);
+  save(STORE.pregnancy, pregnancyData); renderFirstTimeList(); toast('已删除');
+}
+function renderFirstTimeList(){
+  const list = document.getElementById('firstTimeList');
+  if(!pregnancyData.firstTimes.length){ list.innerHTML='<div class="empty-state">暂无记录</div>'; return; }
+  const sorted = [...pregnancyData.firstTimes].sort((a,b)=>b.date.localeCompare(a.date));
+  list.innerHTML = sorted.map(f=>`
+    <div style="border:1px solid #f9a8d4;border-radius:10px;padding:12px;margin-bottom:8px;background:#fdf2f8">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
+        <span style="font-weight:600;font-size:14px;color:#9d174d">🌟 ${escapeHtml(f.title)}</span>
+        <button class="btn-danger-text" onclick="deleteFirstTime('${f.id}')">删除</button>
+      </div>
+      <div style="font-size:12px;color:#be185d;margin-top:4px">📅 ${escapeHtml(f.date)}</div>
+      ${f.note?`<div style="font-size:13px;margin-top:4px">${escapeHtml(f.note)}</div>`:''}
+    </div>`).join('');
+}
+// 写给宝宝日记
+function addBabyDiary(){
+  const content = prompt('想对宝宝说什么？', '');
+  if(!content || !content.trim()) return;
+  pregnancyData.diaries.push({ id:uid(), date:todayKey(), content:content.trim() });
+  save(STORE.pregnancy, pregnancyData);
+  renderBabyDiaryList(); toast('日记已保存 💌');
+}
+function deleteBabyDiary(id){
+  pregnancyData.diaries = pregnancyData.diaries.filter(d=>d.id!==id);
+  save(STORE.pregnancy, pregnancyData); renderBabyDiaryList(); toast('已删除');
+}
+function renderBabyDiaryList(){
+  const list = document.getElementById('babyDiaryList');
+  if(!pregnancyData.diaries.length){ list.innerHTML='<div class="empty-state">还没有日记，记录你想对宝宝说的话</div>'; return; }
+  const sorted = [...pregnancyData.diaries].sort((a,b)=>b.date.localeCompare(a.date));
+  list.innerHTML = sorted.map(d=>`
+    <div style="border-left:3px solid #f9a8d4;padding:10px 12px;margin-bottom:8px;background:#fdf2f8;border-radius:0 8px 8px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:#be185d">💌 ${escapeHtml(d.date)}</span>
+        <button class="btn-danger-text" onclick="deleteBabyDiary('${d.id}')">删除</button>
+      </div>
+      <div style="font-size:13px;line-height:1.7;margin-top:4px;white-space:pre-wrap">${escapeHtml(d.content)}</div>
+    </div>`).join('');
+}
+// 备忘录联动：显示 #孕期 标签的备忘
+function renderPregMemoList(){
+  const list = document.getElementById('pregMemoList');
+  const pregMemos = memos.filter(m=>m.tags && m.tags.includes('#孕期'));
+  if(!pregMemos.length){ list.innerHTML='<div class="empty-state">暂无孕期备忘</div>'; return; }
+  list.innerHTML = pregMemos.map(m=>`
+    <div style="background:white;border-radius:8px;padding:10px;margin-bottom:6px">
+      <div style="font-size:13px;line-height:1.5;white-space:pre-wrap">${escapeHtml(m.content)}</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">${new Date(m.time).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+    </div>`).join('');
 }
 
 /* ===== 成长复盘 ===== */
@@ -887,15 +1150,30 @@ function generateReviewPrompt(){
       [1,2,3].forEach(cat=>{ data.categories[cat].forEach(t=>{ totalTasks++; if(t.done)doneTasks++; }); });
     }
   });
-  const learningProgress=Object.values(learningData.directions).map(d=>`${d.name}:${d.progress}%`).join('，');
+  // 孕期数据汇总
+  const pregInfo = getPregWeekInfo();
+  const pregMemos = memos.filter(m=>m.tags && m.tags.includes('#孕期'));
+  const pregMemoCount = pregMemos.length;
+  const weightCount = pregnancyData.weights.length;
+  const diaryCount = pregnancyData.diaries.length;
+  const checkupCount = pregnancyData.checkups.length;
+  const firstTimeCount = pregnancyData.firstTimes.length;
+  const recentWeights = pregnancyData.weights.slice(-2);
+  const weightChange = recentWeights.length >= 2 ? (recentWeights[1].weight - recentWeights[0].weight).toFixed(1) : '0';
 
   const prompt=`你是一位成长教练，请帮我生成${period}的复盘初稿。
 
 【数据摘要】
 - 任务：共${totalTasks}个，完成${doneTasks}个，完成率${totalTasks?Math.round(doneTasks/totalTasks*100):0}%
-- 备忘录：${memos.length}条
+- 备忘录：${memos.length}条（其中孕期相关${pregMemoCount}条）
 - 选题灵感：${inspirations.length}个（已用${inspirations.filter(i=>i.status==='used').length}个）
-- 学习进度：${learningProgress}
+
+【身体健康 - 孕期数据】
+- 当前孕周：${pregInfo.week}周+${pregInfo.day}天（${pregInfo.trimester||'未知'}），距预产期${pregInfo.countdown}天
+- 体重记录：${weightCount}条，近期变化${weightChange}kg
+- 产检档案：${checkupCount}条
+- 孕期日记：${diaryCount}篇
+- 孕期第一次：${firstTimeCount}条
 
 请按以下结构生成（每部分2-3句话）：
 1. 回顾目标
@@ -903,7 +1181,8 @@ function generateReviewPrompt(){
 3. 关键成果
 4. 遇阻卡点
 5. 调整策略
-6. 一句话总结`;
+6. 身体健康（重点分析孕期状态）
+7. 一句话总结`;
   out.innerHTML=`<div class="prompt-output"><div class="prompt-text">${escapeHtml(prompt)}</div>${promptActionsHTML(prompt)}</div>
     <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
       <button class="btn btn-success btn-sm" onclick="saveReviewManual()">💾 保存复盘</button>
@@ -931,7 +1210,7 @@ function showReviewDetail(id){
 }
 
 /* ===== 备忘录 ===== */
-const MEMO_TAGS=['#工作','#生活','#创作灵感','#健康','#学习','#情绪记录'];
+const MEMO_TAGS=['#工作','#生活','#创作灵感','#健康','#学习','#情绪记录','#孕期'];
 function renderTagSelector(){
   document.getElementById('memoTagSelector').innerHTML=MEMO_TAGS.map(t=>`<span class="tag-option ${selectedMemoTags.includes(t)?'selected':''}" onclick="toggleMemoTag('${t}')">${t}</span>`).join('');
 }
@@ -960,7 +1239,7 @@ function renderMemoList(){
 function generateMemoTagPrompt(){
   const input=document.getElementById('memoInput');
   const text=input.value.trim(); if(!text){toast('请先输入内容');return;}
-  const prompt=`请为以下内容打标签，可选：#工作 #生活 #创作灵感 #健康 #学习 #情绪记录。只返回标签名，空格分隔。\n\n"${text}"`;
+  const prompt=`请为以下内容打标签，可选：#工作 #生活 #创作灵感 #健康 #学习 #情绪记录 #孕期。只返回标签名，空格分隔。\n\n"${text}"`;
   const out=document.createElement('div');
   out.innerHTML=`<div class="prompt-output" style="margin-top:8px"><div class="prompt-text">${escapeHtml(prompt)}</div>${promptActionsHTML(prompt)}</div>`;
   const card=input.closest('.card');
@@ -976,7 +1255,7 @@ function init(){
   renderAppLauncher(); renderAppDrawer();
   renderCalendar(); renderTasks();
   renderInspirations(); renderHotspots();
-  renderLearningNav(); renderReviewTimeline();
+  renderPregnancy(); renderReviewTimeline();
   renderMemoList(); renderTagSelector();
   setInterval(()=>{ const h=new Date().getHours(); if(h===20||h===21){ const td=getDayTasks(todayKey()); const todo=[1,2,3].reduce((s,c)=>s+td.categories[c].filter(t=>!t.done).length,0); if(todo>0)toast(`⏰ 今日还有 ${todo} 个任务未完成`); } },3600000);
   toast('工作台已就绪 🌱');
